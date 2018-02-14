@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1048671637373",
+    "firebase_url": "https://coincollection-c20fc.firebaseio.com",
+    "project_id": "coincollection-c20fc",
+    "storage_bucket": "coincollection-c20fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048671637373:android:ba8f3069addb0c00",
+        "android_client_info": {
+          "package_name": "eaton.connor.coincollection"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1048671637373-5tm1l0h7k9b0s3ucius8qkkfh7b9n8m7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPbYzUDhnsBtGWeXsrYurrLf9YB9UBfrM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
