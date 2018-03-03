@@ -1,6 +1,7 @@
 package eaton.connor.coincollection;
 
 import android.content.Intent;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,10 +21,14 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import org.w3c.dom.Text;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class AddCoinActivity extends AppCompatActivity {
+
+    public static final String SerialNumber = "SerialNumber";
 
     private Map<String, Object> user= new HashMap<>();
     private Map<String, Object> coin = new HashMap<>();
@@ -37,6 +42,11 @@ public class AddCoinActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
+
+        String serial_num = getIntent().getStringExtra(SerialNumber);
+
+        TextInputEditText SN_input = (TextInputEditText) findViewById(R.id.input_serial_num);
+        SN_input.setText(serial_num);
 
         // Populate these from db later
         String[] array_denom = new String[] {"$1"};

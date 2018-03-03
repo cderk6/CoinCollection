@@ -84,12 +84,13 @@ public class HomeActivity extends AppCompatActivity {
         fab_scan = (FloatingActionButton) findViewById(R.id.floating_scan);
         fab_manual = (FloatingActionButton) findViewById(R.id.floating_manual);
 
-/*        fab_scan.setOnClickListener(new View.OnClickListener(){
+        fab_scan.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 // Open scan activity
+                startActivity(new Intent(HomeActivity.this, ScanActivity.class));
             }
         });
-        */
+
         fab_manual.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 // Open AddCoinActivity.class
