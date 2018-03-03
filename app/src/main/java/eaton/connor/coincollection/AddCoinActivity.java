@@ -1,6 +1,7 @@
 package eaton.connor.coincollection;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -21,8 +23,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
-import org.w3c.dom.Text;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,10 +36,13 @@ public class AddCoinActivity extends AppCompatActivity {
 
     public static final String SerialNumber = "SerialNumber";
 
-    private Map<String, Object> user= new HashMap<>();
+    private Map<String, Object> user = new HashMap<>();
     private Map<String, Object> coin = new HashMap<>();
     private String denom, type, year, mint, grade = "";
     FirebaseFirestore db;
+
+    TextInputEditText SN_input;
+    EditText price_input;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,18 +51,23 @@ public class AddCoinActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
+        SN_input = (TextInputEditText) findViewById(R.id.input_serial_num);
+        price_input = (EditText) findViewById(R.id.spinner_price);
 
         String serial_num = getIntent().getStringExtra(SerialNumber);
 
-        TextInputEditText SN_input = (TextInputEditText) findViewById(R.id.input_serial_num);
+
         SN_input.setText(serial_num);
 
+        parseCoinInfo(serial_num);
+
+
         // Populate these from db later
-        String[] array_denom = new String[] {"$1"};
-        String[] array_type = new String[] {"Morgan Dollar"};
-        String[] array_year = new String[] {"1879"};
-        String[] array_mint = new String[] {"O"};
-        String[] array_grade = new String[] {"MS63"};
+        String[] array_denom = new String[]{"$1"};
+        String[] array_type = new String[]{"Morgan Dollar"};
+        String[] array_year = new String[]{"1879"};
+        String[] array_mint = new String[]{"O"};
+        String[] array_grade = new String[]{"MS63"};
 
         final Spinner spinner_denom = (Spinner) findViewById(R.id.spinner_denomination);
         ArrayAdapter<String> adapter_denom = new ArrayAdapter<String>(this,
@@ -153,7 +167,7 @@ public class AddCoinActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_add_coin:
                 // Submit coin data to db
                 addCoin();
@@ -181,14 +195,71 @@ public class AddCoinActivity extends AppCompatActivity {
         ref.add(coin);
     }
 
-    private String addUser(){
+    private String addUser() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String uid = auth.getCurrentUser().getUid();
 
-        user.put("user_id",  uid);
+        user.put("user_id", uid);
 
         db.collection("users").document(uid)
                 .set(user, SetOptions.merge());
         return uid;
+    }
+
+
+    private void parseCoinInfo(final String serial_num) {
+        final StringBuffer year = new StringBuffer("");
+        final StringBuffer mint = new StringBuffer("");
+        final StringBuffer denom = new StringBuffer("");
+        final StringBuffer grade = new StringBuffer("");
+        final StringBuffer price = new StringBuffer("");
+
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final StringBuilder builder = new StringBuilder();
+                builder.append(serial_num);
+                try {
+
+                    String URL = "https://www.pcgs.com/cert/" + serial_num;
+
+                    Document doc = Jsoup.connect(URL).get();
+
+                    Element table = doc.select("table").get(0);
+                    Elements rows = table.select("tr");
+
+                    for (int i = 1; i < rows.size(); i++) {
+                        Element row = rows.get(i);
+                        Elements cols = row.select("td");
+
+                        builder.append("," + cols.get(1).text());
+                        if(cols.get(0).text().equals("Date, mintmark")){
+                            String[] parts = cols.get(1).text().split("-");
+                            year.append(parts[0]);
+                            if(parts.length > 1)
+                            {
+                                mint.append(parts[1]);
+                            }
+                        }
+                        else if(cols.get(0).text().startsWith("PCGS P")){
+                            price.append(cols.get(1).text());
+                        }
+                    }
+                } catch (IOException e) {
+                    builder.append("Error : ").append(e.getMessage()).append("\n");
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        SN_input.setText(price);
+                        price_input.setText(price);
+                        
+                    }
+                });
+            }
+        }).start();
     }
 }
