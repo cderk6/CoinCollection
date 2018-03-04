@@ -1,7 +1,9 @@
 package eaton.connor.coincollection;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,12 +31,21 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class AddCoinActivity extends AppCompatActivity {
 
     public static final String SerialNumber = "SerialNumber";
+    public static final String Year = "Year";
+    public static final String Mint = "Mint";
+    public static final String Denom = "Denom";
+    public static final String Grade = "Grade";
+    public static final String Price = "Price";
+
 
     private Map<String, Object> user = new HashMap<>();
     private Map<String, Object> coin = new HashMap<>();
@@ -43,6 +54,8 @@ public class AddCoinActivity extends AppCompatActivity {
 
     TextInputEditText SN_input;
     EditText price_input;
+
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,25 +68,48 @@ public class AddCoinActivity extends AppCompatActivity {
         price_input = (EditText) findViewById(R.id.spinner_price);
 
         String serial_num = getIntent().getStringExtra(SerialNumber);
+        String s_denom = getIntent().getStringExtra(Denom);
+        String s_price = getIntent().getStringExtra(Price);
+        String s_year = getIntent().getStringExtra(Year);
+        String s_mint = getIntent().getStringExtra(Mint);
+        String s_grade = getIntent().getStringExtra(Grade);
 
 
         SN_input.setText(serial_num);
 
-        parseCoinInfo(serial_num);
+        handler = new Handler();
+        /*
+        if (serial_num != null){
+            parseCoinInfo(serial_num);
+        }
+        */
 
 
         // Populate these from db later
-        String[] array_denom = new String[]{"$1"};
-        String[] array_type = new String[]{"Morgan Dollar"};
-        String[] array_year = new String[]{"1879"};
-        String[] array_mint = new String[]{"O"};
-        String[] array_grade = new String[]{"MS63"};
+        HashSet<String> array_denom = new HashSet<String>();
+        array_denom.add("$1");
+        HashSet<String> array_type = new HashSet<String>();
+        array_type.add("Morgan Dollar");
+        HashSet<String> array_year = new HashSet<String>();
+        array_year.add("1879");
+        HashSet<String> array_mint = new HashSet<String>();
+        array_mint.add("O");
+        HashSet<String> array_grade = new HashSet<String>();
+        array_grade.add("MS63");
+
+
+        if (s_denom != null && !s_denom.equals("")) array_denom.add(s_denom);
+        if (s_year != null && !s_year.equals("")) array_year.add(s_year);
+        if (s_mint != null) array_mint.add(s_mint);
+        if (s_grade != null && !s_grade.equals("")) array_grade.add(s_grade);
+        if (s_price != null && !s_price.equals("")) price_input.setText(s_price);
 
         final Spinner spinner_denom = (Spinner) findViewById(R.id.spinner_denomination);
         ArrayAdapter<String> adapter_denom = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, array_denom);
+                android.R.layout.simple_spinner_item, new ArrayList<String>(array_denom));
         adapter_denom.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_denom.setAdapter(adapter_denom);
+        if(s_denom != null && !s_denom.equals("")) spinner_denom.setSelection(adapter_denom.getPosition(s_denom));
         spinner_denom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -88,9 +124,10 @@ public class AddCoinActivity extends AppCompatActivity {
 
         final Spinner spinner_type = (Spinner) findViewById(R.id.spinner_type);
         ArrayAdapter<String> adapter_type = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, array_type);
+                android.R.layout.simple_spinner_item, new ArrayList<String>(array_type));
         adapter_type.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_type.setAdapter(adapter_type);
+        //if(!s_type.equals("")) spinner_type.setSelection(adapter_type.getPosition(s_type));
         spinner_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -105,9 +142,10 @@ public class AddCoinActivity extends AppCompatActivity {
 
         final Spinner spinner_year = (Spinner) findViewById(R.id.spinner_year);
         ArrayAdapter<String> adapter_year = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, array_year);
+                android.R.layout.simple_spinner_item, new ArrayList<String>(array_year));
         adapter_year.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_year.setAdapter(adapter_year);
+        if(s_year != null && !s_year.equals("")) spinner_year.setSelection(adapter_year.getPosition(s_year));
         spinner_year.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -122,9 +160,10 @@ public class AddCoinActivity extends AppCompatActivity {
 
         final Spinner spinner_mint = (Spinner) findViewById(R.id.spinner_mint);
         ArrayAdapter<String> adapter_mint = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, array_mint);
+                android.R.layout.simple_spinner_item, new ArrayList<String>(array_mint));
         adapter_mint.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_mint.setAdapter(adapter_mint);
+        if(s_mint != null) spinner_mint.setSelection(adapter_mint.getPosition(s_mint));
         spinner_mint.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -139,9 +178,10 @@ public class AddCoinActivity extends AppCompatActivity {
 
         final Spinner spinner_grade = (Spinner) findViewById(R.id.spinner_grade);
         ArrayAdapter<String> adapter_grade = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, array_grade);
+                android.R.layout.simple_spinner_item, new ArrayList<String>(array_grade));
         adapter_grade.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_grade.setAdapter(adapter_grade);
+        if(s_grade != null && !s_grade.equals("")) spinner_grade.setSelection(adapter_grade.getPosition(s_grade));
         spinner_grade.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -226,7 +266,6 @@ public class AddCoinActivity extends AppCompatActivity {
                     String URL = "https://www.pcgs.com/cert/" + serial_num;
 
                     Document doc = Jsoup.connect(URL).get();
-
                     Element table = doc.select("table").get(0);
                     Elements rows = table.select("tr");
 
@@ -249,14 +288,22 @@ public class AddCoinActivity extends AppCompatActivity {
                     }
                 } catch (IOException e) {
                     builder.append("Error : ").append(e.getMessage()).append("\n");
+                } catch (IndexOutOfBoundsException e) {
+                    runOnUiThread(new Runnable(){
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Coin info could not be found for this serial number.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        SN_input.setText(price);
+                        SN_input.setText(serial_num);
                         price_input.setText(price);
-                        
+
+
                     }
                 });
             }

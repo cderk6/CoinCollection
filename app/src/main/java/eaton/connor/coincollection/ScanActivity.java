@@ -293,8 +293,8 @@ public final class ScanActivity extends AppCompatActivity implements BarcodeTrac
         //do something with barcode data returned
         if(barcode.rawValue.length() > 15) {
             String sn = barcode.rawValue;
-            Intent intent = new Intent(this, AddCoinActivity.class);
-            intent.putExtra(AddCoinActivity.SerialNumber, sn);
+            Intent intent = new Intent(this, ParsingActivity.class);
+            intent.putExtra(ParsingActivity.SerialNumber, sn);
 
             startActivity(intent);
         }
