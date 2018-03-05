@@ -39,6 +39,7 @@ public class ParsingActivity extends AppCompatActivity {
         final StringBuffer denom = new StringBuffer("");
         final StringBuffer grade = new StringBuffer("");
         final StringBuffer price = new StringBuffer("");
+        final StringBuffer series = new StringBuffer("");
 
 
 
@@ -55,7 +56,7 @@ public class ParsingActivity extends AppCompatActivity {
                     Element table = doc.select("table").get(0);
                     Elements rows = table.select("tr");
 
-                    for (int i = 1; i < rows.size(); i++) {
+                    for (int i = 0; i < rows.size(); i++) {
                         Element row = rows.get(i);
                         Elements cols = row.select("td");
 
@@ -76,6 +77,24 @@ public class ParsingActivity extends AppCompatActivity {
                         }
                         else if(cols.get(0).text().startsWith("PCGS P")){
                             price.append(cols.get(1).text());
+                        }
+                        else if(cols.get(0).text().startsWith("PCGS #")){
+                            try {
+                                String n = cols.get(1).text();
+                                String URL_series = "http://www.pcgscoinfacts.com/Coin/Detail/" + n;
+                                Document doc_series = Jsoup.connect(URL_series).get();
+                                Element table_series = doc_series.select("table#tblSeriesAndLevel").get(0);
+                                Element row_series = table_series.select("tr").get(0);
+                                Element col_series = row_series.select("td").get(1);
+                                series.append(col_series.text());
+                            } catch (IOException e) {
+                                runOnUiThread(new Runnable(){
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "The coin series could not be determined at this time. Try again later.", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -100,6 +119,7 @@ public class ParsingActivity extends AppCompatActivity {
                 intent.putExtra(AddCoinActivity.Denom, denom.toString());
                 intent.putExtra(AddCoinActivity.Grade, grade.toString());
                 intent.putExtra(AddCoinActivity.Price, price.toString());
+                intent.putExtra(AddCoinActivity.Series, series.toString());
                 startActivity(intent);
             }
         }).start();

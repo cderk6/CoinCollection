@@ -8,12 +8,28 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1048671637373:android:ba8f3069addb0c00",
+        "mobilesdk_app_id": "1:1048671637373:android:26773e7a45f6df21",
         "android_client_info": {
           "package_name": "eaton.connor.coincollection"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1048671637373-4nikska5tkr9v20cnjh2dn4dp6vav8ai.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "eaton.connor.coincollection",
+            "certificate_hash": "9e0b53df46abd383bc79ae77103d12b94a35bd4b"
+          }
+        },
+        {
+          "client_id": "1048671637373-a678m4mpfifs7r8iq0mqsm14l5q2nlcq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "eaton.connor.coincollection",
+            "certificate_hash": "7d3e2b8460db04dd5aa6eda4b2dbde59d1794227"
+          }
+        },
         {
           "client_id": "1048671637373-5tm1l0h7k9b0s3ucius8qkkfh7b9n8m7.apps.googleusercontent.com",
           "client_type": 3
@@ -29,8 +45,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1048671637373-5tm1l0h7k9b0s3ucius8qkkfh7b9n8m7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

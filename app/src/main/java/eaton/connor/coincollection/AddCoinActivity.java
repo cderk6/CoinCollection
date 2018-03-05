@@ -45,6 +45,7 @@ public class AddCoinActivity extends AppCompatActivity {
     public static final String Denom = "Denom";
     public static final String Grade = "Grade";
     public static final String Price = "Price";
+    public static final String Series = "Series";
 
 
     private Map<String, Object> user = new HashMap<>();
@@ -73,6 +74,7 @@ public class AddCoinActivity extends AppCompatActivity {
         String s_year = getIntent().getStringExtra(Year);
         String s_mint = getIntent().getStringExtra(Mint);
         String s_grade = getIntent().getStringExtra(Grade);
+        String s_series = getIntent().getStringExtra(Series);
 
 
         SN_input.setText(serial_num);
@@ -103,6 +105,7 @@ public class AddCoinActivity extends AppCompatActivity {
         if (s_mint != null) array_mint.add(s_mint);
         if (s_grade != null && !s_grade.equals("")) array_grade.add(s_grade);
         if (s_price != null && !s_price.equals("")) price_input.setText(s_price);
+        if (s_series != null && !s_series.equals("")) array_type.add(s_series);
 
         final Spinner spinner_denom = (Spinner) findViewById(R.id.spinner_denomination);
         ArrayAdapter<String> adapter_denom = new ArrayAdapter<String>(this,
@@ -127,7 +130,7 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_type));
         adapter_type.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_type.setAdapter(adapter_type);
-        //if(!s_type.equals("")) spinner_type.setSelection(adapter_type.getPosition(s_type));
+        if(!s_series.equals("")) spinner_type.setSelection(adapter_type.getPosition(s_series));
         spinner_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
