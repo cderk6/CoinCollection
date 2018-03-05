@@ -121,6 +121,7 @@ public class ParsingActivity extends AppCompatActivity {
                 intent.putExtra(AddCoinActivity.Price, price.toString());
                 intent.putExtra(AddCoinActivity.Series, series.toString());
                 startActivity(intent);
+                finish();
             }
         }).start();
     }

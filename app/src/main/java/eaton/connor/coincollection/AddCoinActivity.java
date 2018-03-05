@@ -50,7 +50,7 @@ public class AddCoinActivity extends AppCompatActivity {
 
     private Map<String, Object> user = new HashMap<>();
     private Map<String, Object> coin = new HashMap<>();
-    private String denom, type, year, mint, grade = "";
+    private String denom, type, year, mint, grade, barcode, price = "";
     FirebaseFirestore db;
 
     TextInputEditText SN_input;
@@ -227,11 +227,14 @@ public class AddCoinActivity extends AppCompatActivity {
     }
 
     private void addCoin() {
+        coin.put("barcode", SN_input.getText().toString());
         coin.put("denomination", denom);
-        coin.put("type", type);
+        coin.put("series", type);
         coin.put("year", year);
         coin.put("mint", mint);
         coin.put("grade", grade);
+        coin.put("price", price_input.getText().toString());
+
 
         String uid = addUser();
         CollectionReference ref = db.collection("users").document(uid).collection("coins");

@@ -24,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             startActivity(HomeActivity.createIntent(this, null));
+            finish();
         } else {
             startActivityForResult(
                     // Get an instance of AuthUI based on the default app

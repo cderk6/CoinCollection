@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toEndOf="@id/text_denomination"
         app:layout_constraintTop_toBottomOf="@id/my_toolbar" />
@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toEndOf="@id/text_type"
         app:layout_constraintTop_toBottomOf="@id/spinner_denomination" />
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:text="Type:"
+        android:text="Series:"
         app:layout_constraintBottom_toBottomOf="@id/spinner_type"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -128,7 +128,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/spinner_mint"
         app:layout_constraintTop_toBottomOf="@id/spinner_mint" />
 
     <TextView
@@ -139,7 +139,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
         android:text="Price:"
-        app:layout_constraintBottom_toBottomOf="@id/spinner_price"
+        app:layout_constraintTop_toTopOf="@id/spinner_price"
         app:layout_constraintEnd_toStartOf="@id/spinner_price" />
 
     <android.support.design.widget.TextInputLayout

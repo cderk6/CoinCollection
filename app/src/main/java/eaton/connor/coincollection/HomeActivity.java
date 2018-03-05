@@ -135,6 +135,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 // signed out. Switch to LoginActivity
                 startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+                finish();
             }
         });
     }
