@@ -130,7 +130,7 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_type));
         adapter_type.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_type.setAdapter(adapter_type);
-        if(!s_series.equals("")) spinner_type.setSelection(adapter_type.getPosition(s_series));
+        if(s_series != null && !s_series.equals("")) spinner_type.setSelection(adapter_type.getPosition(s_series));
         spinner_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
