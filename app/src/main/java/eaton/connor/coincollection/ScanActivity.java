@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// Modifications by Connor Eaton, 2018
 package eaton.connor.coincollection;
 
 import android.Manifest;
