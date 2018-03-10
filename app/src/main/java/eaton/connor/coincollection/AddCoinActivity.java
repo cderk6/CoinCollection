@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+
 public class AddCoinActivity extends AppCompatActivity {
 
     public static final String SerialNumber = "SerialNumber";
@@ -49,7 +50,6 @@ public class AddCoinActivity extends AppCompatActivity {
 
 
     private Map<String, Object> user = new HashMap<>();
-    private Map<String, Object> coin = new HashMap<>();
     private String denom, type, year, mint, grade, barcode, price = "";
     FirebaseFirestore db;
 
@@ -227,18 +227,14 @@ public class AddCoinActivity extends AppCompatActivity {
     }
 
     private void addCoin() {
-        coin.put("barcode", SN_input.getText().toString());
-        coin.put("denomination", denom);
-        coin.put("series", type);
-        coin.put("year", year);
-        coin.put("mint", mint);
-        coin.put("grade", grade);
-        coin.put("price", price_input.getText().toString());
+        String barcode = SN_input.getText().toString();
+        String price = price_input.getText().toString();
 
+        Coin new_coin = new Coin(barcode, denom, type, year, mint, grade, price);
 
         String uid = addUser();
         CollectionReference ref = db.collection("users").document(uid).collection("coins");
-        ref.add(coin);
+        ref.add(new_coin.getMap());
     }
 
     private String addUser() {
@@ -252,67 +248,4 @@ public class AddCoinActivity extends AppCompatActivity {
         return uid;
     }
 
-
-    private void parseCoinInfo(final String serial_num) {
-        final StringBuffer year = new StringBuffer("");
-        final StringBuffer mint = new StringBuffer("");
-        final StringBuffer denom = new StringBuffer("");
-        final StringBuffer grade = new StringBuffer("");
-        final StringBuffer price = new StringBuffer("");
-
-
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final StringBuilder builder = new StringBuilder();
-                builder.append(serial_num);
-                try {
-
-                    String URL = "https://www.pcgs.com/cert/" + serial_num;
-
-                    Document doc = Jsoup.connect(URL).get();
-                    Element table = doc.select("table").get(0);
-                    Elements rows = table.select("tr");
-
-                    for (int i = 1; i < rows.size(); i++) {
-                        Element row = rows.get(i);
-                        Elements cols = row.select("td");
-
-                        builder.append("," + cols.get(1).text());
-                        if(cols.get(0).text().equals("Date, mintmark")){
-                            String[] parts = cols.get(1).text().split("-");
-                            year.append(parts[0]);
-                            if(parts.length > 1)
-                            {
-                                mint.append(parts[1]);
-                            }
-                        }
-                        else if(cols.get(0).text().startsWith("PCGS P")){
-                            price.append(cols.get(1).text());
-                        }
-                    }
-                } catch (IOException e) {
-                    builder.append("Error : ").append(e.getMessage()).append("\n");
-                } catch (IndexOutOfBoundsException e) {
-                    runOnUiThread(new Runnable(){
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "Coin info could not be found for this serial number.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        SN_input.setText(serial_num);
-                        price_input.setText(price);
-
-
-                    }
-                });
-            }
-        }).start();
-    }
 }
