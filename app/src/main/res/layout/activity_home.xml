@@ -11,15 +11,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="eaton.connor.coincollection.HomeActivity">
-
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <include
         layout="@layout/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
 
-    <include layout="@layout/content_home" />
-
+    <include layout="@layout/content_home"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/toolbar"
+        />
+</RelativeLayout>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:fab="http://schemas.android.com/apk/res-auto"

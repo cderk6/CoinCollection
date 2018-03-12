@@ -29,6 +29,17 @@ public class Coin {
 
     }
 
+    public Coin(Map<String, Object> coin_map)
+    {
+        this.barcode=coin_map.get("barcode") == null ? "" : coin_map.get("barcode").toString();
+        this.denom=coin_map.get("denomination") == null ? "" : coin_map.get("denomination").toString();
+        this.series=coin_map.get("series") == null ? "" : coin_map.get("series").toString();
+        this.year=coin_map.get("year") == null ? "" : coin_map.get("year").toString();
+        this.mint=coin_map.get("mint") == null ? "" : coin_map.get("mint").toString();
+        this.grade=coin_map.get("grade") == null ? "" : coin_map.get("grade").toString();
+        this.price=coin_map.get("price") == null ? "" : coin_map.get("price").toString();
+    }
+
     public Map getMap() {
         Map<String, Object> coin_map = new HashMap<>();
 

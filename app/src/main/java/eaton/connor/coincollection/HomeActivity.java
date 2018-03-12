@@ -13,10 +13,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -25,15 +28,37 @@ import com.google.android.gms.tasks.Task;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     private static final String EXTRA_IDP_RESPONSE = "extra_idp_response";
+    private static final String TAG = "HomeActivity";
     private DrawerLayout mDrawer;
     private Toolbar toolbar;
     private NavigationView nvDrawer;
     private ActionBarDrawerToggle drawerToggle;
     private FloatingActionMenu fam;
     private FloatingActionButton fab_scan, fab_manual;
+    ArrayList<Coin> coins;
+
+    FirebaseFirestore db;
+    FirebaseAuth auth;
+
+    ExpandableListAdapter listAdapter;
+    ExpandableListView expListView;
+    List<String> listDataHeader;
+    HashMap<String, List<String>> listDataChild;
 
 
 
@@ -41,6 +66,8 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -98,7 +125,32 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
+        prepareListData();
+
+        listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
+
+        expListView.setAdapter(listAdapter);
+
+        expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                Toast.makeText(
+                        getApplicationContext(),
+                        listDataHeader.get(groupPosition)
+                                + " : "
+                                + listDataChild.get(
+                                listDataHeader.get(groupPosition)).get(
+                                childPosition), Toast.LENGTH_SHORT)
+                        .show();
+                return false;
+            }
+        });
+
+        coins = getCoins();
     }
 
     public static Intent createIntent(
@@ -129,7 +181,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
     }
-    public void signOut(){
+    private void signOut(){
         AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -138,5 +190,73 @@ public class HomeActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private ArrayList<Coin> getCoins() {
+        final ArrayList<Coin> coins = new ArrayList<>();
+        String uid = auth.getCurrentUser().getUid();
+        CollectionReference ref = db.collection("users").document(uid).collection("coins");
+
+        ref.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                coins.add(new Coin(document.getData()));
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+
+                    }
+                });
+        return coins;
+    }
+
+    private void prepareListData() {
+        final ArrayList<Coin> coins = new ArrayList<>();
+        String uid = auth.getCurrentUser().getUid();
+        CollectionReference ref = db.collection("users").document(uid).collection("coins");
+
+        listDataHeader = new ArrayList<String>();
+        listDataChild = new HashMap<String, List<String>>();
+
+        ref.orderBy("denomination").orderBy("year").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (DocumentSnapshot document : task.getResult()) {
+                        Map<String, Object> data = document.getData();
+                        Log.d(TAG, document.getId() + " => " + data);
+                        coins.add(new Coin(data));
+                        String key = data.get("denomination") == null ? "" : data.get("denomination").toString();
+                        String year = data.get("year") == null ? "" : data.get("year").toString();
+                        String mint = data.get("mint") == null ? "" : data.get("mint").toString();
+                        String series = data.get("series") == null ? "" : data.get("series").toString();
+                        String grade = data.get("grade") == null ? "" : data.get("grade").toString();
+                        String info = year + "-" + mint + " " + series + " " + grade;
+                        if(listDataHeader.contains(key))
+                        {
+                            listDataChild.get(key).add(info);
+                        } else {
+                            listDataHeader.add(key);
+                            List<String> val_list = new ArrayList<>();
+                            val_list.add(info);
+                            listDataChild.put(key, val_list);
+                        }
+                    }
+                    listAdapter = new ExpandableListAdapter(HomeActivity.this, listDataHeader, listDataChild);
+
+                    expListView.setAdapter(listAdapter);
+                } else {
+                    Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+
+            }
+        });
+
+
+
     }
 }
