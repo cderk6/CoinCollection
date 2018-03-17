@@ -216,6 +216,7 @@ public class AddCoinActivity extends AppCompatActivity {
                 addCoin();
                 Toast.makeText(getApplicationContext(), "Coin added!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(AddCoinActivity.this, HomeActivity.class));
+                finish();
                 return true;
             case R.id.action_cancel:
                 // Discard data. Switch to HomeActivity

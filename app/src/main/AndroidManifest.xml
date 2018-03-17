@@ -24,7 +24,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AddCoinActivity" />
         <activity android:name=".ScanActivity" />
-        <activity android:name=".ParsingActivity"></activity>
+        <activity android:name=".ParsingActivity" />
+        <activity android:name=".CoinActivity"></activity>
     </application>
 
 </manifest>

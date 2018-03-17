@@ -1,5 +1,8 @@
 package eaton.connor.coincollection;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +10,7 @@ import java.util.Map;
  * Created by Connor on 3/9/2018.
  */
 
-public class Coin {
+public class Coin implements Parcelable {
     private String barcode;
     private String denom;
     private String series;
@@ -17,27 +20,38 @@ public class Coin {
     private String price;
 
 
-    public Coin(String barcode, String denom, String series, String year, String mint, String grade, String price)
-    {
-        this.barcode=barcode;
-        this.denom=denom;
-        this.series=series;
-        this.year=year;
-        this.mint=mint;
-        this.grade=grade;
-        this.price=price;
+    public Coin(String barcode, String denom, String series, String year, String mint, String grade, String price) {
+        this.barcode = barcode;
+        this.denom = denom;
+        this.series = series;
+        this.year = year;
+        this.mint = mint;
+        this.grade = grade;
+        this.price = price;
 
     }
 
-    public Coin(Map<String, Object> coin_map)
-    {
-        this.barcode=coin_map.get("barcode") == null ? "" : coin_map.get("barcode").toString();
-        this.denom=coin_map.get("denomination") == null ? "" : coin_map.get("denomination").toString();
-        this.series=coin_map.get("series") == null ? "" : coin_map.get("series").toString();
-        this.year=coin_map.get("year") == null ? "" : coin_map.get("year").toString();
-        this.mint=coin_map.get("mint") == null ? "" : coin_map.get("mint").toString();
-        this.grade=coin_map.get("grade") == null ? "" : coin_map.get("grade").toString();
-        this.price=coin_map.get("price") == null ? "" : coin_map.get("price").toString();
+    public Coin(Map<String, Object> coin_map) {
+        this.barcode = coin_map.get("barcode") == null ? "" : coin_map.get("barcode").toString();
+        this.denom = coin_map.get("denomination") == null ? "" : coin_map.get("denomination").toString();
+        this.series = coin_map.get("series") == null ? "" : coin_map.get("series").toString();
+        this.year = coin_map.get("year") == null ? "" : coin_map.get("year").toString();
+        this.mint = coin_map.get("mint") == null ? "" : coin_map.get("mint").toString();
+        this.grade = coin_map.get("grade") == null ? "" : coin_map.get("grade").toString();
+        this.price = coin_map.get("price") == null ? "" : coin_map.get("price").toString();
+    }
+
+    public Coin(Parcel in) {
+        String[] data = new String[7];
+
+        in.readStringArray(data);
+        this.barcode = data[0];
+        this.denom = data[1];
+        this.series = data[2];
+        this.year = data[3];
+        this.mint = data[4];
+        this.grade = data[5];
+        this.price = data[6];
     }
 
     public Map getMap() {
@@ -53,4 +67,39 @@ public class Coin {
 
         return coin_map;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeStringArray(new String[]{
+                this.barcode,
+                this.denom,
+                this.series,
+                this.year,
+                this.mint,
+                this.grade,
+                this.price
+        });
+    }
+
+    public static final Parcelable.Creator<Coin> CREATOR = new Parcelable.Creator<Coin>() {
+
+        @Override
+        public Coin createFromParcel(Parcel source) {
+// TODO Auto-generated method stub
+            return new Coin(source);  //using parcelable constructor
+        }
+
+        @Override
+        public Coin[] newArray(int size) {
+// TODO Auto-generated method stub
+            return new Coin[size];
+        }
+    };
+
 }
+

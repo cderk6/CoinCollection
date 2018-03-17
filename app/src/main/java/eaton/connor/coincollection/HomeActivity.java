@@ -50,7 +50,6 @@ public class HomeActivity extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
     private FloatingActionMenu fam;
     private FloatingActionButton fab_scan, fab_manual;
-    ArrayList<Coin> coins;
 
     FirebaseFirestore db;
     FirebaseAuth auth;
@@ -59,6 +58,10 @@ public class HomeActivity extends AppCompatActivity {
     ExpandableListView expListView;
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
+    HashMap<String, List<String>> mapCoinId;
+    HashMap<String, Coin> coins;
+
+
 
 
 
@@ -138,19 +141,24 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
+                String coin_id = mapCoinId.get(listDataHeader.get(groupPosition)).get(childPosition);
                 Toast.makeText(
                         getApplicationContext(),
                         listDataHeader.get(groupPosition)
                                 + " : "
-                                + listDataChild.get(
-                                listDataHeader.get(groupPosition)).get(
-                                childPosition), Toast.LENGTH_SHORT)
+                                + coin_id, Toast.LENGTH_SHORT)
                         .show();
+
+                Intent intent = new Intent(HomeActivity.this, CoinActivity.class);
+                intent.putExtra(CoinActivity.CoinId, coin_id);
+                intent.putExtra(CoinActivity.ACoin, coins.get(coin_id));
+
+                startActivity(intent);
                 return false;
             }
         });
 
-        coins = getCoins();
+        //coins = getCoins();
     }
 
     public static Intent createIntent(
@@ -191,7 +199,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
     }
-
+/*
     private ArrayList<Coin> getCoins() {
         final ArrayList<Coin> coins = new ArrayList<>();
         String uid = auth.getCurrentUser().getUid();
@@ -213,14 +221,15 @@ public class HomeActivity extends AppCompatActivity {
                 });
         return coins;
     }
-
+*/
     private void prepareListData() {
-        final ArrayList<Coin> coins = new ArrayList<>();
         String uid = auth.getCurrentUser().getUid();
         CollectionReference ref = db.collection("users").document(uid).collection("coins");
 
         listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, List<String>>();
+        mapCoinId = new HashMap<String, List<String>>();
+        coins = new HashMap<String, Coin>();
 
         ref.orderBy("denomination").orderBy("year").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -229,7 +238,7 @@ public class HomeActivity extends AppCompatActivity {
                     for (DocumentSnapshot document : task.getResult()) {
                         Map<String, Object> data = document.getData();
                         Log.d(TAG, document.getId() + " => " + data);
-                        coins.add(new Coin(data));
+                        String id = document.getId();
                         String key = data.get("denomination") == null ? "" : data.get("denomination").toString();
                         String year = data.get("year") == null ? "" : data.get("year").toString();
                         String mint = data.get("mint") == null ? "" : data.get("mint").toString();
@@ -239,12 +248,19 @@ public class HomeActivity extends AppCompatActivity {
                         if(listDataHeader.contains(key))
                         {
                             listDataChild.get(key).add(info);
+                            mapCoinId.get(key).add(document.getId());
                         } else {
                             listDataHeader.add(key);
                             List<String> val_list = new ArrayList<>();
                             val_list.add(info);
                             listDataChild.put(key, val_list);
+
+                            List<String> id_list = new ArrayList<>();
+                            id_list.add(id);
+                            mapCoinId.put(key, id_list);
                         }
+                        coins.put(id, new Coin(data));
+
                     }
                     listAdapter = new ExpandableListAdapter(HomeActivity.this, listDataHeader, listDataChild);
 
