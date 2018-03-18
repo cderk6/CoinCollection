@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -55,6 +56,8 @@ public class AddCoinActivity extends AppCompatActivity {
 
     TextInputEditText SN_input;
     EditText price_input;
+    RelativeLayout btn_obverse;
+    RelativeLayout btn_reverse;
 
     private Handler handler;
 
@@ -67,6 +70,23 @@ public class AddCoinActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         SN_input = (TextInputEditText) findViewById(R.id.input_serial_num);
         price_input = (EditText) findViewById(R.id.spinner_price);
+        btn_obverse = (RelativeLayout) findViewById(R.id.relLayoutObv);
+        btn_reverse = (RelativeLayout) findViewById(R.id.relLayoutRev);
+        btn_obverse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Click test obverse", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        btn_reverse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Click test reverse", Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
         String serial_num = getIntent().getStringExtra(SerialNumber);
         String s_denom = getIntent().getStringExtra(Denom);
