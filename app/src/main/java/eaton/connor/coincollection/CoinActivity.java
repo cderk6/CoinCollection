@@ -112,7 +112,19 @@ public class CoinActivity extends AppCompatActivity {
             final StorageReference ref= mStorage.child("Users").child(uid).child(picOrder[i] + "s").child(coin_id);
             ImageView img = new ImageView(this);
             GlideApp.with(this).load(ref).into(img);
-            
+            img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    GlideApp.with(CoinActivity.this).load(ref).into(img_big);
+                    img_big.setVisibility(View.VISIBLE);
+                    img_big.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            img_big.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            });
             TableRow row = new TableRow(this);
             TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
             row.setLayoutParams(lp);
