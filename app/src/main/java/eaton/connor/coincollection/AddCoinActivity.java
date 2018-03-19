@@ -2,9 +2,14 @@ package eaton.connor.coincollection;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,24 +20,34 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,6 +64,10 @@ public class AddCoinActivity extends AppCompatActivity {
     public static final String Price = "Price";
     public static final String Series = "Series";
 
+    private static final int CAMERA_REQUEST_CODE_OBV = 1;
+    private static final int CAMERA_REQUEST_CODE_REV = 2;
+
+
 
     private Map<String, Object> user = new HashMap<>();
     private String denom, type, year, mint, grade, barcode, price = "";
@@ -58,8 +77,12 @@ public class AddCoinActivity extends AppCompatActivity {
     EditText price_input;
     RelativeLayout btn_obverse;
     RelativeLayout btn_reverse;
+    ImageView img_obverse;
+    ImageView img_reverse;
 
     private Handler handler;
+    private StorageReference mStorage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,12 +93,21 @@ public class AddCoinActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         SN_input = (TextInputEditText) findViewById(R.id.input_serial_num);
         price_input = (EditText) findViewById(R.id.spinner_price);
+
         btn_obverse = (RelativeLayout) findViewById(R.id.relLayoutObv);
+        img_obverse = (ImageView) findViewById(R.id.imageViewObv);
         btn_reverse = (RelativeLayout) findViewById(R.id.relLayoutRev);
+        img_reverse = (ImageView) findViewById(R.id.imageViewRev);
+
+        mStorage = FirebaseStorage.getInstance().getReference();
+
         btn_obverse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(), "Click test obverse", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, CAMERA_REQUEST_CODE_OBV);
+
 
             }
         });
@@ -84,7 +116,8 @@ public class AddCoinActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(), "Click test reverse", Toast.LENGTH_SHORT).show();
-
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, CAMERA_REQUEST_CODE_REV);
             }
         });
 
@@ -268,5 +301,44 @@ public class AddCoinActivity extends AppCompatActivity {
                 .set(user, SetOptions.merge());
         return uid;
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK) {
+            if (requestCode == CAMERA_REQUEST_CODE_OBV || requestCode == CAMERA_REQUEST_CODE_REV) {
+                ImageView img;
+                String loc;
+                if(requestCode == CAMERA_REQUEST_CODE_OBV){
+                    img = img_obverse;
+                    loc = "Obverses";
+                } else {
+                    img = img_reverse;
+                    loc = "Reverses";
+                }
+                Bundle extras = data.getExtras();
+
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+
+                img.getLayoutParams().height = (int) (getResources().getDisplayMetrics().density * imageBitmap.getHeight());
+                img.requestLayout();
+                img.setImageBitmap(imageBitmap);
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                imageBitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
+                byte[] bitmapdata = bos.toByteArray();
+
+                StorageReference path = mStorage.child("Users").child(loc).child(SN_input.getText().toString());
+
+                path.putBytes(bitmapdata).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    }
+
 
 }
