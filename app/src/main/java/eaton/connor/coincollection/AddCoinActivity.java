@@ -3,11 +3,13 @@ package eaton.connor.coincollection;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +27,9 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.firestore.CollectionReference;
@@ -45,6 +49,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputValidation;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -68,7 +73,6 @@ public class AddCoinActivity extends AppCompatActivity {
     private static final int CAMERA_REQUEST_CODE_REV = 2;
 
 
-
     private Map<String, Object> user = new HashMap<>();
     private String denom, type, year, mint, grade, barcode, price = "";
     FirebaseFirestore db;
@@ -82,6 +86,10 @@ public class AddCoinActivity extends AppCompatActivity {
 
     private Handler handler;
     private StorageReference mStorage;
+    private String mCurrentPhotoPathObv;
+    private String mCurrentPhotoPathRev;
+
+
 
 
     @Override
@@ -104,20 +112,14 @@ public class AddCoinActivity extends AppCompatActivity {
         btn_obverse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Click test obverse", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, CAMERA_REQUEST_CODE_OBV);
-
-
+                dispatchTakePictureIntent(CAMERA_REQUEST_CODE_OBV);
             }
         });
 
         btn_reverse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Click test reverse", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, CAMERA_REQUEST_CODE_REV);
+                dispatchTakePictureIntent(CAMERA_REQUEST_CODE_REV);
             }
         });
 
@@ -165,7 +167,8 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_denom));
         adapter_denom.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_denom.setAdapter(adapter_denom);
-        if(s_denom != null && !s_denom.equals("")) spinner_denom.setSelection(adapter_denom.getPosition(s_denom));
+        if (s_denom != null && !s_denom.equals(""))
+            spinner_denom.setSelection(adapter_denom.getPosition(s_denom));
         spinner_denom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -183,7 +186,8 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_type));
         adapter_type.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_type.setAdapter(adapter_type);
-        if(s_series != null && !s_series.equals("")) spinner_type.setSelection(adapter_type.getPosition(s_series));
+        if (s_series != null && !s_series.equals(""))
+            spinner_type.setSelection(adapter_type.getPosition(s_series));
         spinner_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -201,7 +205,8 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_year));
         adapter_year.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_year.setAdapter(adapter_year);
-        if(s_year != null && !s_year.equals("")) spinner_year.setSelection(adapter_year.getPosition(s_year));
+        if (s_year != null && !s_year.equals(""))
+            spinner_year.setSelection(adapter_year.getPosition(s_year));
         spinner_year.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -219,7 +224,7 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_mint));
         adapter_mint.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_mint.setAdapter(adapter_mint);
-        if(s_mint != null) spinner_mint.setSelection(adapter_mint.getPosition(s_mint));
+        if (s_mint != null) spinner_mint.setSelection(adapter_mint.getPosition(s_mint));
         spinner_mint.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -237,7 +242,8 @@ public class AddCoinActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, new ArrayList<String>(array_grade));
         adapter_grade.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_grade.setAdapter(adapter_grade);
-        if(s_grade != null && !s_grade.equals("")) spinner_grade.setSelection(adapter_grade.getPosition(s_grade));
+        if (s_grade != null && !s_grade.equals(""))
+            spinner_grade.setSelection(adapter_grade.getPosition(s_grade));
         spinner_grade.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -267,7 +273,7 @@ public class AddCoinActivity extends AppCompatActivity {
             case R.id.action_add_coin:
                 // Submit coin data to db
                 addCoin();
-                Toast.makeText(getApplicationContext(), "Coin added!", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Coin added!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(AddCoinActivity.this, HomeActivity.class));
                 finish();
                 return true;
@@ -286,9 +292,15 @@ public class AddCoinActivity extends AppCompatActivity {
 
         Coin new_coin = new Coin(barcode, denom, type, year, mint, grade, price);
 
-        String uid = addUser();
+        final String uid = addUser();
         CollectionReference ref = db.collection("users").document(uid).collection("coins");
-        ref.add(new_coin.getMap());
+        ref.add(new_coin.getMap()).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+                Toast.makeText(AddCoinActivity.this, "Coin added! " + task.getResult().getId(), Toast.LENGTH_SHORT).show();
+                uploadPhotos(task.getResult().getId(), uid);
+            }
+        });
     }
 
     private String addUser() {
@@ -305,40 +317,102 @@ public class AddCoinActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             if (requestCode == CAMERA_REQUEST_CODE_OBV || requestCode == CAMERA_REQUEST_CODE_REV) {
                 ImageView img;
-                String loc;
-                if(requestCode == CAMERA_REQUEST_CODE_OBV){
+                String photo_path;
+                if (requestCode == CAMERA_REQUEST_CODE_OBV) {
                     img = img_obverse;
-                    loc = "Obverses";
+                    photo_path = mCurrentPhotoPathObv;
                 } else {
                     img = img_reverse;
-                    loc = "Reverses";
+                    photo_path = mCurrentPhotoPathRev;
+
                 }
-                Bundle extras = data.getExtras();
 
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                Bitmap imageBitmap = BitmapFactory.decodeFile(photo_path);
 
-                img.getLayoutParams().height = (int) (getResources().getDisplayMetrics().density * imageBitmap.getHeight());
+                Bitmap thumbnail = Bitmap.createScaledBitmap(imageBitmap, (int)(imageBitmap.getWidth() * 0.05), (int)(imageBitmap.getHeight() * 0.05), false);
+
+                img.getLayoutParams().height = (int) (getResources().getDisplayMetrics().density * thumbnail.getHeight());
+                img.getLayoutParams().width = (int) (getResources().getDisplayMetrics().density * thumbnail.getWidth());
                 img.requestLayout();
-                img.setImageBitmap(imageBitmap);
-
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                imageBitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
-                byte[] bitmapdata = bos.toByteArray();
-
-                StorageReference path = mStorage.child("Users").child(loc).child(SN_input.getText().toString());
-
-                path.putBytes(bitmapdata).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
-                    }
-                });
+                img.setImageBitmap(thumbnail);
             }
         }
     }
 
+    private void uploadPhotos(String id, String uid) {
 
+        StorageReference path_obv = mStorage.child("Users").child(uid).child("Obverses").child(id);
+        StorageReference path_rev = mStorage.child("Users").child(uid).child("Reverses").child(id);
+
+        Bitmap bmp_obv = BitmapFactory.decodeFile(mCurrentPhotoPathObv);
+
+        ByteArrayOutputStream bos_obv = new ByteArrayOutputStream();
+        bmp_obv.compress(Bitmap.CompressFormat.JPEG, 70, bos_obv);
+        byte[] bitmapdata_obv = bos_obv.toByteArray();
+
+        Bitmap bmp_rev = BitmapFactory.decodeFile(mCurrentPhotoPathRev);
+
+        ByteArrayOutputStream bos_rev = new ByteArrayOutputStream();
+        bmp_rev.compress(Bitmap.CompressFormat.JPEG, 70, bos_rev);
+        byte[] bitmapdata_rev = bos_rev.toByteArray();
+
+
+        path_obv.putBytes(bitmapdata_obv).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+            }
+        });
+        path_rev.putBytes(bitmapdata_rev).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private File createImageFile(int CODE) throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        if(CODE == CAMERA_REQUEST_CODE_OBV){
+            mCurrentPhotoPathObv = image.getAbsolutePath();
+        } else {
+            mCurrentPhotoPathRev = image.getAbsolutePath();
+        }
+        return image;
+    }
+    private void dispatchTakePictureIntent(int CODE) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile(CODE);
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, CODE);
+            }
+        }
+    }
 }
