@@ -343,35 +343,38 @@ public class AddCoinActivity extends AppCompatActivity {
     }
 
     private void uploadPhotos(String id, String uid) {
+        if(mCurrentPhotoPathObv != null){
+            StorageReference path_obv = mStorage.child("Users").child(uid).child("Obverses").child(id);
 
-        StorageReference path_obv = mStorage.child("Users").child(uid).child("Obverses").child(id);
-        StorageReference path_rev = mStorage.child("Users").child(uid).child("Reverses").child(id);
+            Bitmap bmp_obv = BitmapFactory.decodeFile(mCurrentPhotoPathObv);
 
-        Bitmap bmp_obv = BitmapFactory.decodeFile(mCurrentPhotoPathObv);
+            ByteArrayOutputStream bos_obv = new ByteArrayOutputStream();
+            bmp_obv.compress(Bitmap.CompressFormat.JPEG, 70, bos_obv);
+            byte[] bitmapdata_obv = bos_obv.toByteArray();
 
-        ByteArrayOutputStream bos_obv = new ByteArrayOutputStream();
-        bmp_obv.compress(Bitmap.CompressFormat.JPEG, 70, bos_obv);
-        byte[] bitmapdata_obv = bos_obv.toByteArray();
+            path_obv.putBytes(bitmapdata_obv).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+         if(mCurrentPhotoPathRev != null) {
+            StorageReference path_rev = mStorage.child("Users").child(uid).child("Reverses").child(id);
 
-        Bitmap bmp_rev = BitmapFactory.decodeFile(mCurrentPhotoPathRev);
+            Bitmap bmp_rev = BitmapFactory.decodeFile(mCurrentPhotoPathRev);
 
-        ByteArrayOutputStream bos_rev = new ByteArrayOutputStream();
-        bmp_rev.compress(Bitmap.CompressFormat.JPEG, 70, bos_rev);
-        byte[] bitmapdata_rev = bos_rev.toByteArray();
+            ByteArrayOutputStream bos_rev = new ByteArrayOutputStream();
+            bmp_rev.compress(Bitmap.CompressFormat.JPEG, 70, bos_rev);
+            byte[] bitmapdata_rev = bos_rev.toByteArray();
 
-
-        path_obv.putBytes(bitmapdata_obv).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
-            }
-        });
-        path_rev.putBytes(bitmapdata_rev).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
-            }
-        });
+            path_rev.putBytes(bitmapdata_rev).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     private File createImageFile(int CODE) throws IOException {
