@@ -27,6 +27,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -344,7 +345,7 @@ public class AddCoinActivity extends AppCompatActivity {
 
     private void uploadPhotos(String id, String uid) {
         if(mCurrentPhotoPathObv != null){
-            StorageReference path_obv = mStorage.child("Users").child(uid).child("Obverses").child(id);
+            final StorageReference path_obv = mStorage.child("Users").child(uid).child("Obverses").child(id);
 
             Bitmap bmp_obv = BitmapFactory.decodeFile(mCurrentPhotoPathObv);
 
@@ -355,12 +356,17 @@ public class AddCoinActivity extends AppCompatActivity {
             path_obv.putBytes(bitmapdata_obv).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    //Cache image after it's uploaded
+                    GlideApp.with(getApplicationContext()).download(path_obv);
+
                     Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+
+
                 }
             });
         }
          if(mCurrentPhotoPathRev != null) {
-            StorageReference path_rev = mStorage.child("Users").child(uid).child("Reverses").child(id);
+            final StorageReference path_rev = mStorage.child("Users").child(uid).child("Reverses").child(id);
 
             Bitmap bmp_rev = BitmapFactory.decodeFile(mCurrentPhotoPathRev);
 
@@ -371,7 +377,11 @@ public class AddCoinActivity extends AppCompatActivity {
             path_rev.putBytes(bitmapdata_rev).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    //Cache image after it's uploaded
+                    GlideApp.with(getApplicationContext()).downloadOnly();
+
                     Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+
                 }
             });
         }
