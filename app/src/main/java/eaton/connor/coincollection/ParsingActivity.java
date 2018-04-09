@@ -84,9 +84,23 @@ public class ParsingActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Make sure you have internet access.", Toast.LENGTH_LONG).show();
                         }
                     });
+
+                    //Try NGC
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            action.setText("Checking NGC");
+                        }
+                    });
+
+                    String ngc_id = serial_num.substring(0, 6);
+                    String ngc_grade = serial_num.substring(6, 8);
+                    URL = "https://www.ngccoin.com/price-history/api/" + ngc_id + "/" + ngc_grade;
+
+                    new JsonTask().execute(URL, serial_num);
                 } else {
                     try {
                         Element table = doc.select("table").get(0);
@@ -287,7 +301,7 @@ public class ParsingActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getApplicationContext(), "ICG servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "ICG servers could not be reached. Make sure you have internet access.", Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
@@ -335,7 +349,7 @@ public class ParsingActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Coin price and series info could not be found at this time. Make sure you have internet access.", Toast.LENGTH_LONG).show();
                                 }
                             });
                         } else {
@@ -361,7 +375,7 @@ public class ParsingActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getApplicationContext(), "Coin price and series info could not be found at this time. Make sure you have internet access.", Toast.LENGTH_LONG).show();
                                     }
                                 });
                             } else {
@@ -412,7 +426,7 @@ public class ParsingActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Only PCGS, NGC, and ICG are supported.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Only PCGS, NGC, and ICG are supported at this time. Try again if you think the serial number is valid.", Toast.LENGTH_LONG).show();
                             }
                         });
                         Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
