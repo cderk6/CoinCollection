@@ -261,25 +261,130 @@ public class ParsingActivity extends AppCompatActivity {
     }
     private void parseICG(final String serial_num) {
         //try parsing
+        final StringBuffer year = new StringBuffer("");
+        final StringBuffer mint = new StringBuffer("");
+        final StringBuffer denom = new StringBuffer("");
+        final StringBuffer grade = new StringBuffer("");
+        final StringBuffer price = new StringBuffer("");
+        final StringBuffer series = new StringBuffer("");
+        final StringBuffer details = new StringBuffer("");
 
-
-        //if unsuccessful
-        runOnUiThread(new Runnable() {
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), "Only PCGS, NGC, and ICG are supported.", Toast.LENGTH_LONG).show();
+                final StringBuilder builder = new StringBuilder();
+                builder.append(serial_num);
+
+                String URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8,18);
+                Document doc = null;
+                for (int tries = 1; tries < 4; tries++) {
+                    try {
+                        doc = Jsoup.connect(URL).get();
+                        break;
+                    } catch (IOException e) {
+                        Log.w("ParsingActivity", "ICG timeout count: " + tries);
+                    }
+                }
+                if (doc == null) {
+                    //Failed to connect to ICG after 3 attempts
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "ICG servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } else {
+                    try {
+                        Element table = doc.select("table").get(0);
+                        Elements rows = table.select("tr");
+
+                        for (int i = 0; i < rows.size(); i++) {
+                            Element row = rows.get(i);
+                            Elements cols = row.select("td");
+
+                            builder.append("," + cols.get(1).text());
+                            if (cols.get(0).text().startsWith("Coin D")) {
+                                String[] parts = cols.get(1).text().trim().split("[-,]");
+                                year.append(parts[0]);
+                                if (parts.length > 1) {
+                                    mint.append(parts[1]);
+                                }
+                            } else if (cols.get(0).text().startsWith("Denom")) {
+                                denom.append(cols.get(1).text().trim());
+                            } else if (cols.get(0).text().startsWith("Gra")) {
+                                String temp = cols.get(1).text().replaceAll("[-,]", " ").trim();
+                                grade.append(temp);
+                            } else if (cols.get(0).text().startsWith("Var") || cols.get(0).text().startsWith("Det")) {
+                                String temp = cols.get(1).text().replaceAll("[-,]", " ").trim();
+                                details.append(temp);
+                            }
+
+                        }
+                        String search_results_URL = "https://www.collectorsuniverse.com/SpecSearch/Search/PCGS?callback=jQuery111309298615020573713_1520498037997&term=" +
+                                year.toString() + "+" + mint.toString() + "+" + denom.toString() + "+" + grade.toString().replace(" ", "+") + "+" + details.toString().replace(" ", "+") +
+                                "&includeTypeCoins=true&includeworld=false&worldOnly=false&ancestorCategoryId=&pricedgrades=false&priceguideonly=true&popOnly=false&auctionpriceonly=false&_=1520498038011";
+                        Document search_doc = null;
+                        for (int tries = 1; tries < 4; tries++) {
+                            try {
+                                search_doc = Jsoup.connect(search_results_URL).ignoreContentType(true).get();
+                                break;
+                            } catch (IOException e) {
+                                Log.w("ParsingActivity", "PCGS search results timeout count: " + tries);
+                                e.printStackTrace();
+                            }
+                        }
+                        if (search_doc == null) {
+                            //Failed to connect to PCGS search after 3 attempts
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        } else {
+                            String search_results = search_doc.outerHtml();
+                            int beg = search_results.indexOf("specno");
+                            int end = search_results.indexOf("&quot;,&quot;description", beg);
+                            String specno = search_results.substring(beg+19, end);
+                            Log.w("ParsingActivity", specno);
+                        }
+                        Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
+                        intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
+                        intent.putExtra(AddCoinActivity.Year, year.toString());
+                        intent.putExtra(AddCoinActivity.Mint, mint.toString());
+                        intent.putExtra(AddCoinActivity.Denom, denom.toString());
+                        intent.putExtra(AddCoinActivity.Grade, grade.toString());
+                        intent.putExtra(AddCoinActivity.Price, price.toString());
+                        intent.putExtra(AddCoinActivity.Series, series.toString());
+                        startActivity(intent);
+                        finish();
+                        return;
+                    } catch (IndexOutOfBoundsException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Only PCGS, NGC, and ICG are supported.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
+                        intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
+                        intent.putExtra(AddCoinActivity.Year, "");
+                        intent.putExtra(AddCoinActivity.Mint, "");
+                        intent.putExtra(AddCoinActivity.Denom, "");
+                        intent.putExtra(AddCoinActivity.Grade, "");
+                        intent.putExtra(AddCoinActivity.Price, "");
+                        intent.putExtra(AddCoinActivity.Series, "");
+                        startActivity(intent);
+                        finish();
+                    }
+
+                }
+
             }
         });
-        Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
-        intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
-        intent.putExtra(AddCoinActivity.Year, "");
-        intent.putExtra(AddCoinActivity.Mint, "");
-        intent.putExtra(AddCoinActivity.Denom, "");
-        intent.putExtra(AddCoinActivity.Grade, "");
-        intent.putExtra(AddCoinActivity.Price, "");
-        intent.putExtra(AddCoinActivity.Series, "");
-        startActivity(intent);
-        finish();
+
+        t.start();
+
 
     }
 }
