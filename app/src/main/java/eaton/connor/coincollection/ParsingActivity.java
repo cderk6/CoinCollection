@@ -285,27 +285,27 @@ public class ParsingActivity extends AppCompatActivity {
             public void run() {
                 final StringBuilder builder = new StringBuilder();
                 builder.append(serial_num);
-
-                String URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8, 18);
-                Document doc = null;
-                for (int tries = 1; tries < 4; tries++) {
-                    try {
-                        doc = Jsoup.connect(URL).get();
-                        break;
-                    } catch (IOException e) {
-                        Log.w("ParsingActivity", "ICG timeout count: " + tries);
-                    }
-                }
-                if (doc == null) {
-                    //Failed to connect to ICG after 3 attempts
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), "ICG servers could not be reached. Make sure you have internet access.", Toast.LENGTH_LONG).show();
+                try {
+                    String URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8, 18);
+                    Document doc = null;
+                    for (int tries = 1; tries < 4; tries++) {
+                        try {
+                            doc = Jsoup.connect(URL).get();
+                            break;
+                        } catch (IOException e) {
+                            Log.w("ParsingActivity", "ICG timeout count: " + tries);
                         }
-                    });
-                } else {
-                    try {
+                    }
+                    if (doc == null) {
+                        //Failed to connect to ICG after 3 attempts
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "ICG servers could not be reached. Make sure you have internet access.", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+
                         Element table = doc.select("table").get(0);
                         Elements rows = table.select("tr");
 
@@ -422,27 +422,27 @@ public class ParsingActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                         return;
-                    } catch (IndexOutOfBoundsException e) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getApplicationContext(), "Only PCGS, NGC, and ICG are supported at this time. Try again if you think the serial number is valid.", Toast.LENGTH_LONG).show();
-                            }
-                        });
-                        Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
-                        intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
-                        intent.putExtra(AddCoinActivity.Year, "");
-                        intent.putExtra(AddCoinActivity.Mint, "");
-                        intent.putExtra(AddCoinActivity.Denom, "");
-                        intent.putExtra(AddCoinActivity.Grade, "");
-                        intent.putExtra(AddCoinActivity.Price, "");
-                        intent.putExtra(AddCoinActivity.Series, "");
-                        startActivity(intent);
-                        finish();
+
                     }
 
+                } catch (IndexOutOfBoundsException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Only PCGS, NGC, and ICG are supported at this time. Try again if you think the serial number is valid.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
+                    intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
+                    intent.putExtra(AddCoinActivity.Year, "");
+                    intent.putExtra(AddCoinActivity.Mint, "");
+                    intent.putExtra(AddCoinActivity.Denom, "");
+                    intent.putExtra(AddCoinActivity.Grade, "");
+                    intent.putExtra(AddCoinActivity.Price, "");
+                    intent.putExtra(AddCoinActivity.Series, "");
+                    startActivity(intent);
+                    finish();
                 }
-
             }
         });
 
