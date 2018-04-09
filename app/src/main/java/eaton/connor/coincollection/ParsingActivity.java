@@ -46,7 +46,6 @@ public class ParsingActivity extends AppCompatActivity {
         String serial_num = getIntent().getStringExtra(SerialNumber);
 
 
-
         if (serial_num != null) {
             parseCoinInfo(serial_num);
         }
@@ -163,10 +162,8 @@ public class ParsingActivity extends AppCompatActivity {
         t.start();
 
 
-
-
-
     }
+
     private class JsonTask extends AsyncTask<String, String, String> {
         String serial_num;
 
@@ -190,7 +187,7 @@ public class ParsingActivity extends AppCompatActivity {
                 String line = "";
 
                 while ((line = reader.readLine()) != null) {
-                    buffer.append(line+"\n");
+                    buffer.append(line + "\n");
                     Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
 
                 }
@@ -221,7 +218,7 @@ public class ParsingActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            if(result != null){
+            if (result != null) {
                 try {
                     JSONObject json = new JSONObject(result);
                     JSONObject coin = json.getJSONObject("coin");
@@ -243,12 +240,11 @@ public class ParsingActivity extends AppCompatActivity {
                     intent.putExtra(AddCoinActivity.Series, series);
                     startActivity(intent);
                     finish();
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     Log.w("ParsingActivity", "JSON Exception");
                     e.printStackTrace();
                 }
-            }
-            else {
+            } else {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -259,6 +255,7 @@ public class ParsingActivity extends AppCompatActivity {
             }
         }
     }
+
     private void parseICG(final String serial_num) {
         //try parsing
         final StringBuffer year = new StringBuffer("");
@@ -275,7 +272,7 @@ public class ParsingActivity extends AppCompatActivity {
                 final StringBuilder builder = new StringBuilder();
                 builder.append(serial_num);
 
-                String URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8,18);
+                String URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8, 18);
                 Document doc = null;
                 for (int tries = 1; tries < 4; tries++) {
                     try {
@@ -345,8 +342,60 @@ public class ParsingActivity extends AppCompatActivity {
                             String search_results = search_doc.outerHtml();
                             int beg = search_results.indexOf("specno");
                             int end = search_results.indexOf("&quot;,&quot;description", beg);
-                            String specno = search_results.substring(beg+19, end);
+                            String specno = search_results.substring(beg + 19, end);
                             Log.w("ParsingActivity", specno);
+
+                            String PCGS_URL = "http://www.pcgscoinfacts.com/Coin/Detail/" + specno;
+
+                            Document info_doc = null;
+                            for (int tries = 1; tries < 4; tries++) {
+                                try {
+                                    info_doc = Jsoup.connect(PCGS_URL).ignoreContentType(true).get();
+                                    break;
+                                } catch (IOException e) {
+                                    Log.w("ParsingActivity", "PCGS info timeout count: " + tries);
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (info_doc == null) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Check your internet connection.", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            } else {
+                                try {
+
+                                    Element info_table = info_doc.select("div#valueview").get(0);
+                                    Element info_row = info_table.select("div#grade-" + grade.toString().replaceAll("[^0-9]", "")).get(0);
+                                    Element info_price = info_row.select("div.grade-price").get(0);
+                                    price.append(info_price.text());
+                                } catch (IndexOutOfBoundsException price_not_found) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), "Could not find a price for this coin.", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                                try {
+
+                                    Element table_series = info_doc.select("table#tblSeriesAndLevel").get(0);
+                                    Element row_series = table_series.select("tr").get(0);
+                                    Element col_series = row_series.select("td").get(1);
+                                    series.append(col_series.text());
+                                } catch (IndexOutOfBoundsException series_not_found) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), "Could not find a series for this coin.", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+
+                            }
+
                         }
                         Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
                         intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
