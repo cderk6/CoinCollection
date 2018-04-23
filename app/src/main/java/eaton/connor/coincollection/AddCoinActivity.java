@@ -80,8 +80,14 @@ public class AddCoinActivity extends AppCompatActivity {
     private String denom, type, year, mint, grade, barcode, price = "";
     FirebaseFirestore db;
 
-    TextInputEditText SN_input;
+    EditText SN_input;
     EditText price_input;
+    EditText year_input;
+    EditText denom_input;
+    EditText mint_input;
+    EditText series_input;
+    EditText grade_input;
+
     RelativeLayout btn_obverse;
     RelativeLayout btn_reverse;
     ImageView img_obverse;
@@ -104,8 +110,13 @@ public class AddCoinActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
-        SN_input = (TextInputEditText) findViewById(R.id.input_serial_num);
-        price_input = (EditText) findViewById(R.id.spinner_price);
+        SN_input = (EditText) findViewById(R.id.input_serial_number);
+        price_input = (EditText) findViewById(R.id.input_price);
+        year_input = (EditText) findViewById(R.id.input_year);
+        denom_input = (EditText) findViewById(R.id.input_denom);
+        mint_input = (EditText) findViewById(R.id.input_mint);
+        series_input = (EditText) findViewById(R.id.input_series);
+        grade_input = (EditText) findViewById(R.id.input_grade);
 
         btn_obverse = (RelativeLayout) findViewById(R.id.relLayoutObv);
         img_obverse = (ImageView) findViewById(R.id.imageViewObv);
@@ -139,130 +150,13 @@ public class AddCoinActivity extends AppCompatActivity {
         String s_grade = getIntent().getStringExtra(Grade);
         String s_series = getIntent().getStringExtra(Series);
 
-
-        SN_input.setText(serial_num);
-
-        handler = new Handler();
-        /*
-        if (serial_num != null){
-            parseCoinInfo(serial_num);
-        }
-        */
-
-
-        // Populate these from db later
-        HashSet<String> array_denom = new HashSet<String>();
-        array_denom.add("$1");
-        HashSet<String> array_type = new HashSet<String>();
-        array_type.add("Morgan Dollar");
-        HashSet<String> array_year = new HashSet<String>();
-        array_year.add("1879");
-        HashSet<String> array_mint = new HashSet<String>();
-        array_mint.add("O");
-        HashSet<String> array_grade = new HashSet<String>();
-        array_grade.add("MS63");
-
-
-        if (s_denom != null && !s_denom.equals("")) array_denom.add(s_denom);
-        if (s_year != null && !s_year.equals("")) array_year.add(s_year);
-        if (s_mint != null) array_mint.add(s_mint);
-        if (s_grade != null && !s_grade.equals("")) array_grade.add(s_grade);
+        if (serial_num != null && !serial_num.equals("")) SN_input.setText(serial_num);
+        if (s_denom != null && !s_denom.equals("")) denom_input.setText(s_denom);
+        if (s_year != null && !s_year.equals("")) year_input.setText(s_year);
+        if (s_mint != null) mint_input.setText(s_mint);
+        if (s_grade != null && !s_grade.equals("")) grade_input.setText(s_grade);
         if (s_price != null && !s_price.equals("")) price_input.setText(s_price);
-        if (s_series != null && !s_series.equals("")) array_type.add(s_series);
-
-        final Spinner spinner_denom = (Spinner) findViewById(R.id.spinner_denomination);
-        ArrayAdapter<String> adapter_denom = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, new ArrayList<String>(array_denom));
-        adapter_denom.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner_denom.setAdapter(adapter_denom);
-        if (s_denom != null && !s_denom.equals(""))
-            spinner_denom.setSelection(adapter_denom.getPosition(s_denom));
-        spinner_denom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                denom = spinner_denom.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        final Spinner spinner_type = (Spinner) findViewById(R.id.spinner_type);
-        ArrayAdapter<String> adapter_type = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, new ArrayList<String>(array_type));
-        adapter_type.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner_type.setAdapter(adapter_type);
-        if (s_series != null && !s_series.equals(""))
-            spinner_type.setSelection(adapter_type.getPosition(s_series));
-        spinner_type.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                type = spinner_type.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        final Spinner spinner_year = (Spinner) findViewById(R.id.spinner_year);
-        ArrayAdapter<String> adapter_year = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, new ArrayList<String>(array_year));
-        adapter_year.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner_year.setAdapter(adapter_year);
-        if (s_year != null && !s_year.equals(""))
-            spinner_year.setSelection(adapter_year.getPosition(s_year));
-        spinner_year.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                year = spinner_year.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        final Spinner spinner_mint = (Spinner) findViewById(R.id.spinner_mint);
-        ArrayAdapter<String> adapter_mint = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, new ArrayList<String>(array_mint));
-        adapter_mint.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner_mint.setAdapter(adapter_mint);
-        if (s_mint != null) spinner_mint.setSelection(adapter_mint.getPosition(s_mint));
-        spinner_mint.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mint = spinner_mint.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        final Spinner spinner_grade = (Spinner) findViewById(R.id.spinner_grade);
-        ArrayAdapter<String> adapter_grade = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, new ArrayList<String>(array_grade));
-        adapter_grade.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner_grade.setAdapter(adapter_grade);
-        if (s_grade != null && !s_grade.equals(""))
-            spinner_grade.setSelection(adapter_grade.getPosition(s_grade));
-        spinner_grade.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                grade = spinner_grade.getSelectedItem().toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
+        if (s_series != null && !s_series.equals("")) series_input.setText(s_series);
 
         db = FirebaseFirestore.getInstance();
 
@@ -295,8 +189,14 @@ public class AddCoinActivity extends AppCompatActivity {
     }
 
     private void addCoin() {
-        String barcode = SN_input.getText().toString();
-        String price = price_input.getText().toString();
+        barcode = SN_input.getText().toString();
+        denom = denom_input.getText().toString();
+        type = series_input.getText().toString();
+        year = year_input.getText().toString();
+        mint = mint_input.getText().toString();
+        grade = grade_input.getText().toString();
+        price = price_input.getText().toString();
+
 
         Coin new_coin = new Coin(barcode, denom, type, year, mint, grade, price);
 
