@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -25,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -84,6 +86,8 @@ public class AddCoinActivity extends AppCompatActivity {
     RelativeLayout btn_reverse;
     ImageView img_obverse;
     ImageView img_reverse;
+    TextView txt_obverse;
+    TextView txt_reverse;
 
     private Handler handler;
     private StorageReference mStorage;
@@ -105,8 +109,11 @@ public class AddCoinActivity extends AppCompatActivity {
 
         btn_obverse = (RelativeLayout) findViewById(R.id.relLayoutObv);
         img_obverse = (ImageView) findViewById(R.id.imageViewObv);
+        txt_obverse = (TextView) findViewById(R.id.textViewObv);
         btn_reverse = (RelativeLayout) findViewById(R.id.relLayoutRev);
         img_reverse = (ImageView) findViewById(R.id.imageViewRev);
+        txt_reverse = (TextView) findViewById(R.id.textViewRev);
+
 
         mStorage = FirebaseStorage.getInstance().getReference();
 
@@ -321,12 +328,18 @@ public class AddCoinActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == CAMERA_REQUEST_CODE_OBV || requestCode == CAMERA_REQUEST_CODE_REV) {
                 ImageView img;
+                TextView txt;
+                String type;
                 String photo_path;
                 if (requestCode == CAMERA_REQUEST_CODE_OBV) {
                     img = img_obverse;
+                    txt = txt_obverse;
+                    type = "obverse";
                     photo_path = mCurrentPhotoPathObv;
                 } else {
                     img = img_reverse;
+                    txt = txt_reverse;
+                    type = "reverse";
                     photo_path = mCurrentPhotoPathRev;
 
                 }
@@ -339,6 +352,10 @@ public class AddCoinActivity extends AppCompatActivity {
                 img.getLayoutParams().width = (int) (getResources().getDisplayMetrics().density * thumbnail.getWidth());
                 img.requestLayout();
                 img.setImageBitmap(thumbnail);
+                txt.getLayoutParams().width = (int) (getResources().getDisplayMetrics().density * thumbnail.getWidth());
+                txt.requestLayout();
+                txt.setText("Tap to change " + type);
+                txt.setBackgroundColor(Color.rgb(100,100,100));
             }
         }
     }
