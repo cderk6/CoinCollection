@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -71,6 +72,8 @@ public class AddCoinActivity extends AppCompatActivity {
     public static final String Grade = "Grade";
     public static final String Price = "Price";
     public static final String Series = "Series";
+    public static final String CoinID = "CoinID";
+
 
     private static final int CAMERA_REQUEST_CODE_OBV = 1;
     private static final int CAMERA_REQUEST_CODE_REV = 2;
@@ -142,6 +145,7 @@ public class AddCoinActivity extends AppCompatActivity {
             }
         });
 
+        String coin_id = getIntent().getStringExtra(CoinID);
         String serial_num = getIntent().getStringExtra(SerialNumber);
         String s_denom = getIntent().getStringExtra(Denom);
         String s_price = getIntent().getStringExtra(Price);
@@ -158,6 +162,18 @@ public class AddCoinActivity extends AppCompatActivity {
         if (s_price != null && !s_price.equals("")) price_input.setText(s_price);
         if (s_series != null && !s_series.equals("")) series_input.setText(s_series);
 
+        if (coin_id != null) {
+            final StorageReference path_obv = mStorage.child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Obverses").child(coin_id);
+            final StorageReference path_rev = mStorage.child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Reverses").child(coin_id);
+
+            GlideApp.with(this).load(path_obv).into(img_obverse);
+            GlideApp.with(this).load(path_rev).into(img_reverse);
+            txt_obverse.setText("Tap to change obverse");
+            txt_obverse.setBackgroundColor(Color.rgb(100,100,100));
+            txt_reverse.setText("Tap to change reverse");
+            txt_reverse.setBackgroundColor(Color.rgb(100,100,100));
+
+        }
         db = FirebaseFirestore.getInstance();
 
     }
@@ -176,7 +192,7 @@ public class AddCoinActivity extends AppCompatActivity {
                 // Submit coin data to db
                 addCoin();
                 //Toast.makeText(getApplicationContext(), "Coin added!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(AddCoinActivity.this, HomeActivity.class));
+                startActivity(new Intent(AddCoinActivity.this, HomeActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 finish();
                 return true;
             case R.id.action_cancel:
@@ -196,19 +212,30 @@ public class AddCoinActivity extends AppCompatActivity {
         mint = mint_input.getText().toString();
         grade = grade_input.getText().toString();
         price = price_input.getText().toString();
+        final String s_coin_id = getIntent().getStringExtra(CoinID);
 
 
         Coin new_coin = new Coin(barcode, denom, type, year, mint, grade, price);
 
         final String uid = addUser();
         CollectionReference ref = db.collection("users").document(uid).collection("coins");
-        ref.add(new_coin.getMap()).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentReference> task) {
-                Toast.makeText(AddCoinActivity.this, "Coin added! " + task.getResult().getId(), Toast.LENGTH_SHORT).show();
-                uploadPhotos(task.getResult().getId(), uid);
-            }
-        });
+        if(s_coin_id != null){
+            ref.document(s_coin_id).set(new_coin.getMap()).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentReference> task) {
+                    Toast.makeText(AddCoinActivity.this, "Coin edited! " + s_coin_id, Toast.LENGTH_SHORT).show();
+                    uploadPhotos(s_coin_id, uid);
+                }
+            });
+        }else {
+            ref.add(new_coin.getMap()).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentReference> task) {
+                    Toast.makeText(AddCoinActivity.this, "Coin added! " + task.getResult().getId(), Toast.LENGTH_SHORT).show();
+                    uploadPhotos(task.getResult().getId(), uid);
+                }
+            });
+        }
     }
 
     private String addUser() {
@@ -248,11 +275,10 @@ public class AddCoinActivity extends AppCompatActivity {
 
                 Bitmap thumbnail = Bitmap.createScaledBitmap(imageBitmap, (int)(imageBitmap.getWidth() * 0.05), (int)(imageBitmap.getHeight() * 0.05), false);
 
-                img.getLayoutParams().height = (int) (getResources().getDisplayMetrics().density * thumbnail.getHeight());
-                img.getLayoutParams().width = (int) (getResources().getDisplayMetrics().density * thumbnail.getWidth());
+                img.getLayoutParams().height = RelativeLayout.LayoutParams.MATCH_PARENT;
+                img.getLayoutParams().width = RelativeLayout.LayoutParams.MATCH_PARENT;
                 img.requestLayout();
                 img.setImageBitmap(thumbnail);
-                txt.getLayoutParams().width = (int) (getResources().getDisplayMetrics().density * thumbnail.getWidth());
                 txt.requestLayout();
                 txt.setText("Tap to change " + type);
                 txt.setBackgroundColor(Color.rgb(100,100,100));
@@ -274,7 +300,7 @@ public class AddCoinActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     //Cache image after it's uploaded
-                    GlideApp.with(getApplicationContext()).download(path_obv);
+                    GlideApp.with(getApplicationContext()).download(path_obv).signature(new ObjectKey(String.valueOf(System.currentTimeMillis())));
 
                     Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
 
@@ -295,7 +321,8 @@ public class AddCoinActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     //Cache image after it's uploaded
-                    GlideApp.with(getApplicationContext()).downloadOnly();
+
+                    GlideApp.with(getApplicationContext()).download(path_rev).signature(new ObjectKey(String.valueOf(System.currentTimeMillis())));
 
                     Toast.makeText(AddCoinActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
 

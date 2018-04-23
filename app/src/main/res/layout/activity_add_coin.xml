@@ -9,11 +9,14 @@
     tools:context="eaton.connor.coincollection.AddCoinActivity"
     tools:layout_editor_absoluteY="25dp">
 
-
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentTop ="true"
         android:background="@color/colorPrimaryDark"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
@@ -25,6 +28,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/my_toolbar"
+        android:layout_below="@id/my_toolbar"
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="265dp">
 
@@ -167,70 +171,75 @@
                 android:ems="10" />
 
         </TableRow>
+
+
     </TableLayout>
-
-    <RelativeLayout
-        android:id="@+id/relLayoutObv"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteX="216dp"
-        tools:layout_editor_absoluteY="322dp">
-
-        <ImageView
-            android:id="@+id/imageViewObv"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            app:srcCompat="@android:drawable/ic_menu_gallery" />
-
-        <TextView
-            android:id="@+id/textViewObv"
-            android:layout_width="128dp"
+        android:layout_below="@id/tableLayout2"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+        <RelativeLayout
+            android:id="@+id/relLayoutObv"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/imageViewObv"
+            android:layout_weight="1"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:padding="2dp">
 
-            android:layout_alignRight="@id/imageViewObv"
-            android:gravity="bottom|center_horizontal"
-            android:text="Tap to add obverse" />
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/imageViewObv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                app:srcCompat="@android:drawable/ic_menu_gallery"
+                android:layout_centerVertical="true"/>
 
-    <RelativeLayout
-        android:id="@+id/relLayoutRev"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="322dp"
+            <TextView
+                android:id="@+id/textViewObv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/imageViewObv"
 
-        >
+                android:layout_alignRight="@id/imageViewObv"
+                android:gravity="bottom|center_horizontal"
+                android:text="Tap to add obverse" />
+        </RelativeLayout>
 
-        <ImageView
-            android:id="@+id/imageViewRev"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            app:srcCompat="@android:drawable/ic_menu_gallery" />
-
-        <TextView
-            android:id="@+id/textViewRev"
-            android:layout_width="128dp"
+        <RelativeLayout
+            android:id="@+id/relLayoutRev"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/imageViewRev"
+            android:layout_weight="1"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:padding="2dp">
 
-            android:layout_alignRight="@id/imageViewRev"
-            android:gravity="bottom|center_horizontal"
-            android:text="Tap to add reverse" />
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/imageViewRev"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                app:srcCompat="@android:drawable/ic_menu_gallery" />
+
+            <TextView
+                android:id="@+id/textViewRev"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/imageViewRev"
+                android:layout_alignRight="@id/imageViewRev"
+                android:gravity="bottom|center_horizontal"
+                android:text="Tap to add reverse" />
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>
+
+
+
 
 
 </android.support.constraint.ConstraintLayout>

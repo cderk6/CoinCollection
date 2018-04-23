@@ -22,6 +22,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.signature.ObjectKey;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -124,7 +125,7 @@ public class CoinActivity extends AppCompatActivity {
             c1.setText(picOrder[i].toUpperCase());
             final StorageReference ref = mStorage.child("Users").child(uid).child(picOrder[i] + "s").child(coin_id);
             ImageView img = new ImageView(this);
-            GlideApp.with(this).load(ref).into(img);
+            GlideApp.with(this).load(ref).signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))).into(img);
             img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -186,7 +187,6 @@ public class CoinActivity extends AppCompatActivity {
         final StorageReference ref_img_obv = mStorage.child("Users").child(uid).child("Obverses").child(coin_id);
         final StorageReference ref_img_rev = mStorage.child("Users").child(uid).child("Reverses").child(coin_id);
 
-
         // The action bar home/up action should open or close the drawer.
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -194,6 +194,17 @@ public class CoinActivity extends AppCompatActivity {
                 return true;
             case R.id.action_edit:
                 // Open edit activity
+                Intent intent = new Intent(CoinActivity.this, AddCoinActivity.class);
+                intent.putExtra(AddCoinActivity.CoinID, coin_id);
+                intent.putExtra(AddCoinActivity.SerialNumber, coin.getBarcode());
+                intent.putExtra(AddCoinActivity.Denom, coin.getDenom());
+                intent.putExtra(AddCoinActivity.Grade, coin.getGrade());
+                intent.putExtra(AddCoinActivity.Mint, coin.getMint());
+                intent.putExtra(AddCoinActivity.Price, coin.getPrice());
+                intent.putExtra(AddCoinActivity.Series, coin.getSeries());
+                intent.putExtra(AddCoinActivity.Year, coin.getYear());
+                startActivity(intent);
+
                 return true;
             case R.id.action_delete:
                 // Delete coin from Firestore db and corresponding images from Firebase Storage

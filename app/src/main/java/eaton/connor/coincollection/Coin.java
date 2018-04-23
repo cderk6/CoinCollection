@@ -68,6 +68,34 @@ public class Coin implements Parcelable {
         return coin_map;
     }
 
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public String getDenom() {
+        return denom;
+    }
+
+    public String getSeries() {
+        return series;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public String getMint() {
+        return mint;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
     @Override
     public int describeContents() {
         return 0;
