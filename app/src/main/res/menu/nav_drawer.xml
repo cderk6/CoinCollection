@@ -4,16 +4,10 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:title="Home (placeholder)" />
-        <item
-            android:id="@+id/nav_profile"
-            android:title="Profile (placeholder)" />
+            android:title="Home" />
         <item
             android:id="@+id/nav_stats"
-            android:title="Stats (placeholder)" />
-        <item
-            android:id="@+id/nav_about"
-            android:title="About (placeholder)" />
+            android:title="Stats" />
         <item
             android:id="@+id/nav_signout"
             android:title="Sign out" />

@@ -81,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_menu_search"
-                fab:fab_label="Search for serial number"
+                fab:fab_label="Search by serial number"
                 fab:fab_size="mini" />
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/floating_manual"

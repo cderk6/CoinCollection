@@ -81,14 +81,8 @@ public class CoinActivity extends AppCompatActivity {
                             case R.id.nav_home:
                                 // switch to home activity/fragment
                                 break;
-                            case R.id.nav_profile:
-                                // switch to profile activity/fragment
-                                break;
                             case R.id.nav_stats:
                                 // switch to stats activity/fragment
-                                break;
-                            case R.id.nav_about:
-                                // switch to about activity/fragment
                                 break;
                             case R.id.nav_signout:
                                 // sign out and return to LoginActivity
