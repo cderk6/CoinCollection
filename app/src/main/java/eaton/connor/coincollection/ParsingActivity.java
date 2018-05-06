@@ -49,7 +49,11 @@ public class ParsingActivity extends AppCompatActivity {
 
 
         if (serial_num != null && !serial_num.contains("-")) {
-            parseCoinInfo(serial_num);
+            if(serial_num.contains("/")) {
+                parseCoinInfo(serial_num.substring(serial_num.indexOf("/") + 1));
+            } else{
+                parseCoinInfo(serial_num);
+            }
         }
         else{
             parseNGC(serial_num, grade);
