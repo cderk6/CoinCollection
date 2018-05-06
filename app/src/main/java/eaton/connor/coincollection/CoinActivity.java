@@ -162,7 +162,7 @@ public class CoinActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 // signed out. Switch to LoginActivity
-                startActivity(new Intent(CoinActivity.this, LoginActivity.class));
+                startActivity(new Intent(CoinActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                 finish();
             }
         });
