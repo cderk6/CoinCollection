@@ -122,7 +122,7 @@ public class CoinActivity extends AppCompatActivity {
 
         for (int i = 0; i < picOrder.length; i++) {
             TextView c1 = new TextView(this);
-            c1.setText(picOrder[i].toUpperCase());
+            c1.setText(picOrder[i].toUpperCase() + ": ");
             final StorageReference ref = mStorage.child("Users").child(uid).child(picOrder[i] + "s").child(coin_id);
             ImageView img = new ImageView(this);
             GlideApp.with(this).load(ref).signature(new ObjectKey(String.valueOf(System.currentTimeMillis()))).into(img);

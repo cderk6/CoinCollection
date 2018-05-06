@@ -33,6 +33,7 @@ public class ParsingActivity extends AppCompatActivity {
     private TextView action;
 
     public static final String SerialNumber = "SerialNumber";
+    public static final String Grade = "Grade";
 
 
     @Override
@@ -44,10 +45,14 @@ public class ParsingActivity extends AppCompatActivity {
         action = (TextView) findViewById(R.id.textView4);
 
         String serial_num = getIntent().getStringExtra(SerialNumber);
+        String grade = getIntent().getStringExtra(Grade);
 
 
-        if (serial_num != null) {
+        if (serial_num != null && !serial_num.contains("-")) {
             parseCoinInfo(serial_num);
+        }
+        else{
+            parseNGC(serial_num, grade);
         }
     }
 
@@ -202,7 +207,7 @@ public class ParsingActivity extends AppCompatActivity {
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line + "\n");
-                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+                    Log.d("Response: ", "> " + line);
 
                 }
 
@@ -286,7 +291,12 @@ public class ParsingActivity extends AppCompatActivity {
                 final StringBuilder builder = new StringBuilder();
                 builder.append(serial_num);
                 try {
-                    String URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8, 18);
+                    String URL;
+                    if(serial_num.length() > 10) {
+                        URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num.substring(8, 18);
+                    } else {
+                        URL = "http://www.icgcoin.com/load_SNSearch.php?ctn=" + serial_num;
+                    }
                     Document doc = null;
                     for (int tries = 1; tries < 4; tries++) {
                         try {
@@ -450,5 +460,95 @@ public class ParsingActivity extends AppCompatActivity {
 
 
     }
+
+    private void parseNGC(final String serial_num, final String grade_input) {
+        final StringBuffer year = new StringBuffer("");
+        final StringBuffer mint = new StringBuffer("");
+        final StringBuffer denom = new StringBuffer("");
+        final StringBuffer grade = new StringBuffer("");
+        final StringBuffer price = new StringBuffer("");
+        final StringBuffer series = new StringBuffer("");
+
+        action.setText("Checking NGC");
+
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final StringBuilder builder = new StringBuilder();
+                builder.append(serial_num);
+
+
+                String URL = "https://www.ngccoin.com/certlookup/" + serial_num + "/" + grade_input;
+                Document doc = null;
+                for (int tries = 1; tries < 4; tries++) {
+                    try {
+                        doc = Jsoup.connect(URL).get();
+                        break;
+                    } catch (IOException e) {
+                        Log.w("ParsingActivity", "NGC timeout count: " + tries);
+                    }
+                }
+                if (doc == null) {
+                    //Failed to connect to NGC after 3 attempts
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "NGC servers could not be reached. Make sure you have internet access.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
+                    intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
+                    intent.putExtra(AddCoinActivity.Year, year.toString());
+                    intent.putExtra(AddCoinActivity.Mint, mint.toString());
+                    intent.putExtra(AddCoinActivity.Denom, denom.toString());
+                    intent.putExtra(AddCoinActivity.Grade, grade_input.toString());
+                    intent.putExtra(AddCoinActivity.Price, price.toString());
+                    intent.putExtra(AddCoinActivity.Series, series.toString());
+                    startActivity(intent);
+                    finish();
+                    return;
+
+                } else {
+                    try {
+                        Element link = doc.select("a.certlookup-stats-item").first();
+                        String href = link.attr("href");
+                        String ngc_id = "0" + href.substring(href.indexOf("=") + 1);
+
+                        URL = "https://www.ngccoin.com/price-history/api/" + ngc_id + "/" + grade_input;
+
+                        new JsonTask().execute(URL, serial_num);
+
+                    } catch (IndexOutOfBoundsException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Invalid serial number", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        Intent intent = new Intent(ParsingActivity.this, AddCoinActivity.class);
+                        intent.putExtra(AddCoinActivity.SerialNumber, serial_num);
+                        intent.putExtra(AddCoinActivity.Year, year.toString());
+                        intent.putExtra(AddCoinActivity.Mint, mint.toString());
+                        intent.putExtra(AddCoinActivity.Denom, denom.toString());
+                        intent.putExtra(AddCoinActivity.Grade, grade_input.toString());
+                        intent.putExtra(AddCoinActivity.Price, price.toString());
+                        intent.putExtra(AddCoinActivity.Series, series.toString());
+                        startActivity(intent);
+                        finish();
+                        return;
+                    }
+
+                }
+
+            }
+        });
+
+        t.start();
+
+
+    }
+
 }
 

@@ -2,6 +2,7 @@
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -73,16 +74,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_menu_camera"
-                fab:fab_label="Scan"
+                fab:fab_label="Scan barcode"
                 fab:fab_size="mini" />
-
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/floating_sn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_search"
+                fab:fab_label="Search for serial number"
+                fab:fab_size="mini" />
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/floating_manual"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_menu_edit"
-                fab:fab_label="Manual Entry"
+                fab:fab_label="Manual entry"
                 fab:fab_size="mini" />
+
+
 
         </com.github.clans.fab.FloatingActionMenu>
     </RelativeLayout>

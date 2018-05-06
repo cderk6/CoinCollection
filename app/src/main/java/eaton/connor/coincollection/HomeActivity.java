@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -50,7 +51,7 @@ public class HomeActivity extends AppCompatActivity {
     private NavigationView nvDrawer;
     private ActionBarDrawerToggle drawerToggle;
     private FloatingActionMenu fam;
-    private FloatingActionButton fab_scan, fab_manual;
+    private FloatingActionButton fab_scan, fab_sn, fab_manual;
 
     FirebaseFirestore db;
     FirebaseAuth auth;
@@ -113,12 +114,21 @@ public class HomeActivity extends AppCompatActivity {
 
         fam = (FloatingActionMenu) findViewById(R.id.floating_action_menu);
         fab_scan = (FloatingActionButton) findViewById(R.id.floating_scan);
+        fab_sn = (FloatingActionButton) findViewById(R.id.floating_sn);
         fab_manual = (FloatingActionButton) findViewById(R.id.floating_manual);
 
         fab_scan.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 // Open scan activity
                 startActivity(new Intent(HomeActivity.this, ScanActivity.class));
+            }
+        });
+
+        fab_sn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                // Open AlertDialog
+                DialogFragment sn_frag = new SerialNumberDialogFragment();
+                sn_frag.show(getSupportFragmentManager(), "sn");
             }
         });
 
