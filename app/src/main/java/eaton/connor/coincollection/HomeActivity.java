@@ -88,7 +88,9 @@ public class HomeActivity extends AppCompatActivity {
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch(item.getItemId()){
                             case R.id.nav_home:
-                                // switch to home activity/fragment
+                                // switch to home activity
+                                startActivity(new Intent(HomeActivity.this, HomeActivity.class));
+                                finish();
                                 break;
                             case R.id.nav_stats:
                                 // switch to stats activity/fragment
