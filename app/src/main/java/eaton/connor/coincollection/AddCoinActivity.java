@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -165,14 +166,22 @@ public class AddCoinActivity extends AppCompatActivity {
         if (coin_id != null) {
             final StorageReference path_obv = mStorage.child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Obverses").child(coin_id);
             final StorageReference path_rev = mStorage.child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Reverses").child(coin_id);
-
-            GlideApp.with(this).load(path_obv).into(img_obverse);
-            GlideApp.with(this).load(path_rev).into(img_reverse);
-            txt_obverse.setText("Tap to change obverse");
-            txt_obverse.setBackgroundColor(Color.rgb(100,100,100));
-            txt_reverse.setText("Tap to change reverse");
-            txt_reverse.setBackgroundColor(Color.rgb(100,100,100));
-
+            path_obv.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    GlideApp.with(AddCoinActivity.this).load(path_obv).into(img_obverse);
+                    txt_obverse.setText("Tap to change obverse");
+                    txt_obverse.setBackgroundColor(Color.rgb(100,100,100));
+                }
+            });
+            path_rev.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    GlideApp.with(AddCoinActivity.this).load(path_rev).into(img_reverse);
+                    txt_reverse.setText("Tap to change reverse");
+                    txt_reverse.setBackgroundColor(Color.rgb(100,100,100));
+                }
+            });
         }
         db = FirebaseFirestore.getInstance();
 
@@ -232,7 +241,11 @@ public class AddCoinActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<DocumentReference> task) {
                     Toast.makeText(AddCoinActivity.this, "Coin added! " + task.getResult().getId(), Toast.LENGTH_SHORT).show();
-                    uploadPhotos(task.getResult().getId(), uid);
+                    try {
+                        uploadPhotos(task.getResult().getId(), uid);
+                    } catch (NullPointerException e) {
+                        //no image
+                    }
                 }
             });
         }
