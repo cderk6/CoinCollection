@@ -94,6 +94,8 @@ public class HomeActivity extends AppCompatActivity {
                                 break;
                             case R.id.nav_stats:
                                 // switch to stats activity/fragment
+                                startActivity(new Intent(HomeActivity.this, StatsActivity.class));
+                                finish();
                                 break;
                             case R.id.nav_signout:
                                 // sign out and return to LoginActivity
