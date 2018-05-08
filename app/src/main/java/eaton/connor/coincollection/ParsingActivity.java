@@ -345,8 +345,10 @@ public class ParsingActivity extends AppCompatActivity {
                             }
 
                         }
+                        String temp_denom = String.valueOf(denom);
+                        if (denom.toString().equals("S$1")) temp_denom = "$1";
                         String search_results_URL = "https://www.collectorsuniverse.com/SpecSearch/Search/PCGS?callback=jQuery111309298615020573713_1520498037997&term=" +
-                                year.toString() + "+" + mint.toString() + "+" + denom.toString() + "+" + grade.toString().replace(" ", "+") + "+" + details.toString().replace(" ", "+") +
+                                year.toString() + "-" + mint.toString() + "+" + temp_denom + "+" + grade.toString().replace(" ", "+") + "+" + details.toString().replace(" ", "+") +
                                 "&includeTypeCoins=true&includeworld=false&worldOnly=false&ancestorCategoryId=&pricedgrades=false&priceguideonly=true&popOnly=false&auctionpriceonly=false&_=1520498038011";
                         Document search_doc = null;
                         for (int tries = 1; tries < 4; tries++) {
