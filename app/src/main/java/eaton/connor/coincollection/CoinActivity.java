@@ -115,7 +115,7 @@ public class CoinActivity extends AppCompatActivity {
     private void buildTable() {
         Map<String, String> coin_map = coin.getMap();
         String[] picOrder = {"Obverse", "Reverse"};
-        String[] tableOrder = {"year", "mint", "series", "grade", "denomination", "price", "barcode"};
+        String[] tableOrder = {"year", "mint", "series", "variety", "grade", "denomination", "price", "barcode"};
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         for (int i = 0; i < picOrder.length; i++) {
@@ -200,6 +200,7 @@ public class CoinActivity extends AppCompatActivity {
                 intent.putExtra(AddCoinActivity.Mint, coin.getMint());
                 intent.putExtra(AddCoinActivity.Price, coin.getPrice());
                 intent.putExtra(AddCoinActivity.Series, coin.getSeries());
+                intent.putExtra(AddCoinActivity.Variety, coin.getVariety());
                 intent.putExtra(AddCoinActivity.Year, coin.getYear());
                 startActivity(intent);
 

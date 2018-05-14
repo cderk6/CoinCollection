@@ -74,6 +74,7 @@ public class AddCoinActivity extends AppCompatActivity {
     public static final String Price = "Price";
     public static final String Series = "Series";
     public static final String CoinID = "CoinID";
+    public static final String Variety = "Variety";
 
 
     private static final int CAMERA_REQUEST_CODE_OBV = 1;
@@ -81,7 +82,7 @@ public class AddCoinActivity extends AppCompatActivity {
 
 
     private Map<String, Object> user = new HashMap<>();
-    private String denom, type, year, mint, grade, barcode, price = "";
+    private String denom, type, variety, year, mint, grade, barcode, price = "";
     FirebaseFirestore db;
 
     EditText SN_input;
@@ -90,6 +91,7 @@ public class AddCoinActivity extends AppCompatActivity {
     EditText denom_input;
     EditText mint_input;
     EditText series_input;
+    EditText variety_input;
     EditText grade_input;
 
     RelativeLayout btn_obverse;
@@ -120,6 +122,7 @@ public class AddCoinActivity extends AppCompatActivity {
         denom_input = (EditText) findViewById(R.id.input_denom);
         mint_input = (EditText) findViewById(R.id.input_mint);
         series_input = (EditText) findViewById(R.id.input_series);
+        variety_input = (EditText) findViewById(R.id.input_variety);
         grade_input = (EditText) findViewById(R.id.input_grade);
 
         btn_obverse = (RelativeLayout) findViewById(R.id.relLayoutObv);
@@ -154,6 +157,7 @@ public class AddCoinActivity extends AppCompatActivity {
         String s_mint = getIntent().getStringExtra(Mint);
         String s_grade = getIntent().getStringExtra(Grade);
         String s_series = getIntent().getStringExtra(Series);
+        String s_variety = getIntent().getStringExtra(Variety);
 
         if (serial_num != null && !serial_num.equals("")) SN_input.setText(serial_num);
         if (s_denom != null && !s_denom.equals("")) denom_input.setText(s_denom);
@@ -162,6 +166,8 @@ public class AddCoinActivity extends AppCompatActivity {
         if (s_grade != null && !s_grade.equals("")) grade_input.setText(s_grade);
         if (s_price != null && !s_price.equals("")) price_input.setText(s_price);
         if (s_series != null && !s_series.equals("")) series_input.setText(s_series);
+        if (s_variety != null && !s_variety.equals("")) variety_input.setText(s_variety);
+
 
         if (coin_id != null) {
             final StorageReference path_obv = mStorage.child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Obverses").child(coin_id);
@@ -217,14 +223,16 @@ public class AddCoinActivity extends AppCompatActivity {
         barcode = SN_input.getText().toString();
         denom = denom_input.getText().toString();
         type = series_input.getText().toString();
+        variety = variety_input.getText().toString();
         year = year_input.getText().toString();
         mint = mint_input.getText().toString();
         grade = grade_input.getText().toString();
         price = price_input.getText().toString();
+
         final String s_coin_id = getIntent().getStringExtra(CoinID);
 
 
-        Coin new_coin = new Coin(barcode, denom, type, year, mint, grade, price);
+        Coin new_coin = new Coin(barcode, denom, type, year, mint, grade, price, variety);
 
         final String uid = addUser();
         CollectionReference ref = db.collection("users").document(uid).collection("coins");

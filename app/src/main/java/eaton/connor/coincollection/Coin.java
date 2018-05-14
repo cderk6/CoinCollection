@@ -14,16 +14,18 @@ public class Coin implements Parcelable {
     private String barcode;
     private String denom;
     private String series;
+    private String variety;
     private String year;
     private String mint;
     private String grade;
     private String price;
 
 
-    public Coin(String barcode, String denom, String series, String year, String mint, String grade, String price) {
+    public Coin(String barcode, String denom, String series, String year, String mint, String grade, String price, String variety) {
         this.barcode = barcode;
         this.denom = denom;
         this.series = series;
+        this.variety = variety;
         this.year = year;
         this.mint = mint;
         this.grade = grade;
@@ -35,6 +37,7 @@ public class Coin implements Parcelable {
         this.barcode = coin_map.get("barcode") == null ? "" : coin_map.get("barcode").toString();
         this.denom = coin_map.get("denomination") == null ? "" : coin_map.get("denomination").toString();
         this.series = coin_map.get("series") == null ? "" : coin_map.get("series").toString();
+        this.variety = coin_map.get("variety") == null ? "" : coin_map.get("variety").toString();
         this.year = coin_map.get("year") == null ? "" : coin_map.get("year").toString();
         this.mint = coin_map.get("mint") == null ? "" : coin_map.get("mint").toString();
         this.grade = coin_map.get("grade") == null ? "" : coin_map.get("grade").toString();
@@ -42,16 +45,17 @@ public class Coin implements Parcelable {
     }
 
     public Coin(Parcel in) {
-        String[] data = new String[7];
+        String[] data = new String[8];
 
         in.readStringArray(data);
         this.barcode = data[0];
         this.denom = data[1];
         this.series = data[2];
-        this.year = data[3];
-        this.mint = data[4];
-        this.grade = data[5];
-        this.price = data[6];
+        this.variety = data[3];
+        this.year = data[4];
+        this.mint = data[5];
+        this.grade = data[6];
+        this.price = data[7];
     }
 
     public Map getMap() {
@@ -60,6 +64,7 @@ public class Coin implements Parcelable {
         coin_map.put("barcode", barcode);
         coin_map.put("denomination", denom);
         coin_map.put("series", series);
+        coin_map.put("variety", variety);
         coin_map.put("year", year);
         coin_map.put("mint", mint);
         coin_map.put("grade", grade);
@@ -78,6 +83,10 @@ public class Coin implements Parcelable {
 
     public String getSeries() {
         return series;
+    }
+
+    public String getVariety() {
+        return variety;
     }
 
     public String getYear() {
@@ -107,6 +116,7 @@ public class Coin implements Parcelable {
                 this.barcode,
                 this.denom,
                 this.series,
+                this.variety,
                 this.year,
                 this.mint,
                 this.grade,

@@ -117,6 +117,26 @@
             android:layout_height="match_parent">
 
             <TextView
+                android:id="@+id/text_variety2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:text="Variety:" />
+
+            <EditText
+                android:id="@+id/input_variety"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
                 android:id="@+id/text_grade2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

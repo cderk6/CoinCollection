@@ -252,8 +252,11 @@ public class HomeActivity extends AppCompatActivity {
                         String year = data.get("year") == null ? "" : data.get("year").toString();
                         String mint = data.get("mint") == null ? "" : data.get("mint").toString();
                         String series = data.get("series") == null ? "" : data.get("series").toString();
+                        String variety = data.get("variety") == null ? "" : data.get("variety").toString();
                         String grade = data.get("grade") == null ? "" : data.get("grade").toString();
-                        String info = year + "-" + mint + " " + series + " " + grade;
+                        String price = data.get("price") == null ? "" : data.get("price").toString();
+                        String info = year + "-" + mint + " " + series + " " + variety + " " + grade + " " + price;
+
                         if(listDataHeader.contains(key))
                         {
                             listDataChild.get(key).add(info);

@@ -288,6 +288,7 @@ public class ParsingActivity extends AppCompatActivity {
         final StringBuffer price = new StringBuffer("");
         final StringBuffer series = new StringBuffer("");
         final StringBuffer details = new StringBuffer("");
+        final StringBuffer variety = new StringBuffer("");
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -410,11 +411,13 @@ public class ParsingActivity extends AppCompatActivity {
                                     });
                                 }
                                 try {
-
+                                    Element cn = info_doc.select("title").get(0);
+                                    String coin_name = cn.text().substring(0, cn.text().indexOf("- PCGS"));
                                     Element table_series = info_doc.select("table#tblSeriesAndLevel").get(0);
                                     Element row_series = table_series.select("tr").get(0);
                                     Element col_series = row_series.select("td").get(1);
                                     series.append(col_series.text());
+                                    variety.append(coin_name);
                                 } catch (IndexOutOfBoundsException series_not_found) {
                                     runOnUiThread(new Runnable() {
                                         @Override
@@ -435,6 +438,7 @@ public class ParsingActivity extends AppCompatActivity {
                         intent.putExtra(AddCoinActivity.Grade, grade.toString());
                         intent.putExtra(AddCoinActivity.Price, price.toString());
                         intent.putExtra(AddCoinActivity.Series, series.toString());
+                        intent.putExtra(AddCoinActivity.Variety, variety.toString());
                         startActivity(intent);
                         finish();
                         return;
