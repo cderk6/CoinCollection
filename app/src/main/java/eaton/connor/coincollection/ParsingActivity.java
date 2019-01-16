@@ -76,16 +76,18 @@ public class ParsingActivity extends AppCompatActivity {
             public void run() {
                 final StringBuilder builder = new StringBuilder();
                 builder.append(serial_num);
+                String pcgs_id = serial_num.length() > 7 ? serial_num.substring(serial_num.length() - 8) : serial_num;
 
-
-                String URL = "https://www.pcgs.com/cert/" + serial_num;
+                String URL = "https://www.pcgs.com/cert/" + pcgs_id;
                 Document doc = null;
-                for (int tries = 1; tries < 4; tries++) {
-                    try {
-                        doc = Jsoup.connect(URL).get();
-                        break;
-                    } catch (IOException e) {
-                        Log.w("ParsingActivity", "PCGS timeout count: " + tries);
+                if (serial_num.length() != 18) {
+                    for (int tries = 1; tries < 4; tries++) {
+                        try {
+                            doc = Jsoup.connect(URL).get();
+                            break;
+                        } catch (IOException e) {
+                            Log.w("ParsingActivity", "PCGS timeout count: " + tries);
+                        }
                     }
                 }
                 if (doc == null) {
@@ -96,20 +98,29 @@ public class ParsingActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "PCGS servers could not be reached. Make sure you have internet access.", Toast.LENGTH_LONG).show();
                         }
                     });
+                    if (serial_num.length() > 7) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                action.setText("Checking NGC");
+                            }
+                        });
+                        //Try NGC
+                        String ngc_id = serial_num.substring(0, 6);
+                        String ngc_grade = serial_num.substring(6, 8);
+                        URL = "https://www.ngccoin.com/price-history/api/" + ngc_id + "/" + ngc_grade;
 
-                    //Try NGC
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            action.setText("Checking NGC");
-                        }
-                    });
+                        new JsonTask().execute(URL, serial_num);
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                action.setText("Checking ICG");
+                            }
+                        });
+                        parseICG(serial_num);
+                    }
 
-                    String ngc_id = serial_num.substring(0, 6);
-                    String ngc_grade = serial_num.substring(6, 8);
-                    URL = "https://www.ngccoin.com/price-history/api/" + ngc_id + "/" + ngc_grade;
-
-                    new JsonTask().execute(URL, serial_num);
                 } else {
                     try {
                         Element table = doc.select("table").get(0);
@@ -137,10 +148,12 @@ public class ParsingActivity extends AppCompatActivity {
                                     String n = cols.get(1).text();
                                     String URL_series = "http://www.pcgscoinfacts.com/Coin/Detail/" + n;
                                     Document doc_series = Jsoup.connect(URL_series).get();
-                                    Element table_series = doc_series.select("table#tblSeriesAndLevel").get(0);
-                                    Element row_series = table_series.select("tr").get(0);
-                                    Element col_series = row_series.select("td").get(1);
-                                    series.append(col_series.text());
+                                    String search_results = doc_series.outerHtml();
+                                    int beg = search_results.indexOf("Series: </b>");
+                                    int end = search_results.indexOf("</p>", beg);
+                                    String col_series = search_results.substring(beg + 12, end);
+                                    Log.w("ParsingActivity", col_series);
+                                    series.append(col_series);
                                 } catch (IOException e) {
                                     runOnUiThread(new Runnable() {
                                         @Override
@@ -163,18 +176,28 @@ public class ParsingActivity extends AppCompatActivity {
                         finish();
                         return;
                     } catch (IndexOutOfBoundsException e) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                action.setText("Checking NGC");
-                            }
-                        });
-                        //Try NGC
-                        String ngc_id = serial_num.substring(0, 6);
-                        String ngc_grade = serial_num.substring(6, 8);
-                        URL = "https://www.ngccoin.com/price-history/api/" + ngc_id + "/" + ngc_grade;
+                        if (serial_num.length() > 7) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    action.setText("Checking NGC");
+                                }
+                            });
+                            //Try NGC
+                            String ngc_id = serial_num.substring(0, 6);
+                            String ngc_grade = serial_num.substring(6, 8);
+                            URL = "https://www.ngccoin.com/price-history/api/" + ngc_id + "/" + ngc_grade;
 
-                        new JsonTask().execute(URL, serial_num);
+                            new JsonTask().execute(URL, serial_num);
+                        } else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    action.setText("Checking ICG");
+                                }
+                            });
+                            parseICG(serial_num);
+                        }
                     }
 
                 }
@@ -398,9 +421,11 @@ public class ParsingActivity extends AppCompatActivity {
                             } else {
                                 try {
 
-                                    Element info_table = info_doc.select("div#valueview").get(0);
-                                    Element info_row = info_table.select("div#grade-" + grade.toString().replaceAll("[^0-9]", "")).get(0);
-                                    Element info_price = info_row.select("div.grade-price").get(0);
+                                    Element info_table = info_doc.select("table:has(th.table-grade:contains(" + grade.toString().replaceAll("[^0-9]", "") + "))").get(0);
+                                    //Element info_row = info_table.select("div#grade-" + grade.toString().replaceAll("[^0-9]", "")).get(0);
+                                    //Element info_price = info_row.select("div.grade-price").get(0);
+                                    Element info_row = info_table.select("tbody").get(0);
+                                    Element info_price = info_row.select("td").get(1);
                                     price.append(info_price.text());
                                 } catch (IndexOutOfBoundsException price_not_found) {
                                     runOnUiThread(new Runnable() {
@@ -411,12 +436,14 @@ public class ParsingActivity extends AppCompatActivity {
                                     });
                                 }
                                 try {
+                                    String info_results = info_doc.outerHtml();
+                                    int info_beg = info_results.indexOf("Series: </b>");
+                                    int info_end = info_results.indexOf("</p>", info_beg);
+                                    String col_series = info_results.substring(info_beg + 12, info_end);
+                                    Log.w("ParsingActivity", col_series);
+                                    series.append(col_series);
                                     Element cn = info_doc.select("title").get(0);
                                     String coin_name = cn.text().substring(0, cn.text().indexOf("- PCGS"));
-                                    Element table_series = info_doc.select("table#tblSeriesAndLevel").get(0);
-                                    Element row_series = table_series.select("tr").get(0);
-                                    Element col_series = row_series.select("td").get(1);
-                                    series.append(col_series.text());
                                     variety.append(coin_name);
                                 } catch (IndexOutOfBoundsException series_not_found) {
                                     runOnUiThread(new Runnable() {
